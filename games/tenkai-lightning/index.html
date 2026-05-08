@@ -1,0 +1,1241 @@
+<!doctype html>
+<html lang="ja">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>展開ライトニング</title>
+<style>
+:root{
+  --bg1:#070713; --bg2:#1b1234; --panel:rgba(255,255,255,.10);
+  --text:#f8f3ff; --muted:#cfc3e6; --holy:#ffe989; --danger:#ff5577;
+  --good:#87ffb6; --btn:#252b55; --btn2:#394781; --purple:#b784ff;
+}
+*{box-sizing:border-box}
+html,body{min-height:100%;margin:0}
+button,.key,.modeBtn,.pillBtn{touch-action:manipulation}
+body{
+  font-family:system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI","Noto Sans JP",sans-serif;
+  color:var(--text);
+  background:
+    radial-gradient(circle at 20% 12%, rgba(116,231,255,.22), transparent 26%),
+    radial-gradient(circle at 80% 10%, rgba(183,132,255,.22), transparent 27%),
+    linear-gradient(160deg,var(--bg1),var(--bg2) 65%,#05050b);
+}
+button{font-family:inherit;color:var(--text);border:0;cursor:pointer;user-select:none;-webkit-tap-highlight-color:transparent}
+button:disabled{cursor:not-allowed;opacity:.5;filter:grayscale(.4);box-shadow:none!important;transform:none!important}
+.app{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:12px}
+.screen{width:min(980px,100%);display:none;animation:fadeIn .22s ease both}
+.screen.active{display:block}
+@keyframes fadeIn{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:translateY(0)}}
+.title{
+  text-align:center;margin:0 0 8px;font-size:clamp(31px,7vw,66px);line-height:1.04;font-weight:1000;
+  text-shadow:0 0 20px rgba(255,233,137,.42),0 8px 0 rgba(0,0,0,.28);
+}
+.subtitle{text-align:center;color:var(--muted);font-weight:800;line-height:1.55;margin:0 auto 16px;max-width:760px}
+.card{
+  background:linear-gradient(180deg,rgba(255,255,255,.13),rgba(255,255,255,.07));
+  border:1px solid rgba(255,255,255,.20);border-radius:22px;padding:18px;
+  box-shadow:0 22px 60px rgba(0,0,0,.32),inset 0 1px 0 rgba(255,255,255,.15);
+}
+.modeGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
+.modeBtn{
+  min-height:104px;border-radius:18px;padding:12px;text-align:left;
+  background:linear-gradient(135deg,rgba(48,73,140,.95),rgba(34,27,82,.95));
+  border:1px solid rgba(255,255,255,.18);
+  box-shadow:0 8px 0 rgba(0,0,0,.25),0 16px 30px rgba(0,0,0,.20);
+}
+.modeBtn:active,.pillBtn:active,.key:active{transform:translateY(4px);box-shadow:0 4px 0 rgba(0,0,0,.25)}
+.strongOn .modeBtn{background:linear-gradient(135deg,rgba(118,40,184,.96),rgba(63,22,116,.96))}
+.modeName{display:block;font-size:clamp(16px,4vw,28px);font-weight:1000;margin-bottom:6px}
+.modeDesc{color:#e7def7;line-height:1.35;font-weight:750;font-size:clamp(12px,3vw,16px)}
+.menuActions{display:flex;flex-wrap:wrap;justify-content:center;gap:10px;margin-top:14px}
+.pillBtn{
+  border-radius:999px;padding:11px 16px;background:linear-gradient(180deg,#3d4d8e,#26315f);
+  border:1px solid rgba(255,255,255,.28);font-weight:1000;
+  box-shadow:0 7px 0 rgba(0,0,0,.28),0 14px 26px rgba(0,0,0,.22);
+}
+.pillBtn.primary{background:linear-gradient(135deg,#ffe989,#ffb84f);color:#261300}
+.pillBtn.strong{background:linear-gradient(135deg,#b784ff,#6a28b8)}
+.pillBtn.danger{background:linear-gradient(180deg,#ff6f8e,#b92f55);color:white}
+.pillBtn.limit{
+  background:linear-gradient(180deg,#3a101a,#16060b);
+  color:#ffd2dc;
+  border-color:rgba(255,85,119,.55);
+}
+.pillBtn.limit.on{
+  background:linear-gradient(180deg,#ff5577,#5c0719);
+  color:white;
+  box-shadow:0 7px 0 rgba(0,0,0,.35),0 0 22px rgba(255,85,119,.38);
+}
+.pillBtn.off{
+  background:linear-gradient(180deg,#555963,#2a2d36);
+  color:#c7c9d1;
+  border-color:rgba(255,255,255,.14);
+  filter:saturate(.65) brightness(.82);
+}
+.pillBtn.off:not(:disabled){
+  opacity:.88;
+}
+
+.limitOn .modeBtn{
+  box-shadow:0 8px 0 rgba(0,0,0,.25),0 0 24px rgba(255,85,119,.22);
+  border-color:rgba(255,85,119,.35);
+}
+
+.unlockNote{color:var(--muted);font-weight:800;text-align:center;margin-top:10px;min-height:1.4em}
+
+.small{color:var(--muted);font-size:13px;line-height:1.65}
+
+.menuScreen{position:relative}
+.cornerBtn{
+  position:absolute;right:4px;top:0;z-index:4;
+  border-radius:999px;padding:9px 12px;
+  background:linear-gradient(180deg,#ffe989,#ffb84f);
+  color:#261300;font-weight:1000;
+  border:1px solid rgba(255,255,255,.45);
+  box-shadow:0 6px 0 rgba(0,0,0,.24),0 12px 22px rgba(0,0,0,.22);
+}
+.cornerBtn:active{transform:translateY(3px);box-shadow:0 3px 0 rgba(0,0,0,.24),0 7px 14px rgba(0,0,0,.18)}
+
+.bestModal{
+  position:fixed;inset:0;z-index:100;
+  display:grid;place-items:center;
+  padding:16px;
+  background:rgba(0,0,0,.62);
+  backdrop-filter:blur(3px);
+}
+.bestModal[hidden]{display:none}
+.bestModalCard{
+  width:min(720px,100%);
+  max-height:min(86vh,760px);
+  overflow:auto;
+  border-radius:22px;
+  background:linear-gradient(180deg,rgba(36,30,72,.98),rgba(13,12,28,.98));
+  border:1px solid rgba(255,255,255,.22);
+  box-shadow:0 24px 70px rgba(0,0,0,.46),inset 0 1px 0 rgba(255,255,255,.14);
+  padding:16px;
+}
+.bestModalHeader{
+  display:flex;align-items:flex-start;justify-content:space-between;gap:12px;
+  margin-bottom:12px;
+}
+.bestModalTitle{
+  font-size:clamp(24px,6vw,38px);
+  font-weight:1000;
+  color:#fff2b8;
+  text-shadow:0 0 18px rgba(255,233,137,.32);
+}
+.bestUnlockStatus{
+  color:var(--muted);
+  font-weight:900;
+  margin-top:2px;
+}
+.bestClose{
+  width:42px;height:42px;border-radius:50%;
+  background:linear-gradient(180deg,#ff6f8e,#b92f55);
+  color:white;font-size:26px;font-weight:1000;
+  box-shadow:0 6px 0 rgba(0,0,0,.26);
+}
+.bestModalBody{
+  display:grid;
+  gap:10px;
+}
+.bestSection{
+  background:rgba(255,255,255,.08);
+  border:1px solid rgba(255,255,255,.14);
+  border-radius:16px;
+  padding:12px;
+}
+.bestSectionTitle{
+  color:#ffe989;
+  font-weight:1000;
+  margin-bottom:8px;
+}
+.bestRows{
+  display:grid;
+  grid-template-columns:repeat(2,minmax(0,1fr));
+  gap:8px;
+}
+.bestRow{
+  padding:9px 10px;
+  border-radius:13px;
+  background:rgba(0,0,0,.22);
+  border:1px solid rgba(255,255,255,.10);
+  font-weight:900;
+  line-height:1.35;
+}
+.bestRow small{
+  display:block;
+  color:var(--muted);
+  font-weight:800;
+}
+@media (max-width:520px){
+  .cornerBtn{right:0;top:-2px;padding:8px 10px;font-size:13px}
+  .bestRows{grid-template-columns:repeat(2,minmax(0,1fr));gap:6px}
+  .bestRow{padding:8px 7px;font-size:12px}
+  .bestRow small{font-size:11px}
+}
+
+
+.gameShell{display:grid;gap:10px}
+.topBar{display:grid;grid-template-columns:1fr auto auto;gap:8px;align-items:center}
+.stat{
+  background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.15);
+  border-radius:14px;padding:9px 11px;font-weight:1000;text-align:center;min-width:78px;
+}
+.timeWrap{position:relative;height:28px;border-radius:999px;background:rgba(0,0,0,.28);overflow:hidden;border:1px solid rgba(255,255,255,.16)}
+.timeFill{height:100%;width:100%;background:linear-gradient(90deg,#87ffb6,#ffe989,#ff5577)}
+.timeLabel{
+  position:absolute;inset:0;display:grid;place-items:center;color:#160f1d;font-weight:1000;
+  text-shadow:0 1px rgba(255,255,255,.35);
+}
+.timeLabel.timeWarn{animation:timeWarnPop .86s cubic-bezier(.16,1.35,.35,1) both}
+.timeLabel.timeDanger{animation:timeDangerPop .92s cubic-bezier(.16,1.35,.35,1) both}
+@keyframes timeWarnPop{0%{transform:scale(1)}18%{transform:scale(2.35);color:#4a2500;text-shadow:0 0 18px rgba(255,233,137,.95)}60%{transform:scale(1.55)}100%{transform:scale(1)}}
+@keyframes timeDangerPop{0%{transform:scale(1)}16%{transform:scale(2.7);color:#5a000c;text-shadow:0 0 24px rgba(255,85,119,.95)}58%{transform:scale(1.75)}100%{transform:scale(1)}}
+
+.battle{
+  min-height:260px;position:relative;overflow:hidden;border-radius:22px;
+  background:
+    radial-gradient(circle at 50% 92%,rgba(255,233,137,.18),transparent 28%),
+    radial-gradient(circle at 74% 36%,rgba(255,85,119,.16),transparent 24%),
+    linear-gradient(180deg,rgba(255,255,255,.10),rgba(255,255,255,.04));
+  border:1px solid rgba(255,255,255,.18);
+}
+.battle::before{
+  content:"";position:absolute;inset:0;background-image:
+    linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+    linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
+  background-size:46px 46px;mask-image:linear-gradient(to bottom,rgba(0,0,0,.8),transparent 90%);pointer-events:none;
+}
+.countdownOverlay{
+  position:absolute;inset:0;z-index:30;display:grid;place-items:center;
+  font-size:clamp(74px,20vw,140px);font-weight:1000;color:#fff9c9;
+  text-shadow:0 0 18px rgba(255,233,137,.95),0 0 42px rgba(255,233,137,.65),0 12px 0 rgba(0,0,0,.35);
+  background:radial-gradient(circle,rgba(255,233,137,.16),rgba(0,0,0,.36) 62%,rgba(0,0,0,.54));
+  backdrop-filter:blur(1px);animation:countPop .34s ease both;
+}
+.countdownOverlay[hidden]{display:none}
+.countdownOverlay.pop{animation:countPop .34s ease both}
+@keyframes countPop{0%{opacity:0;transform:scale(.72)}45%{opacity:1;transform:scale(1.10)}100%{opacity:1;transform:scale(1)}}
+.battle.damaged{animation:damageFlash .32s ease both}
+@keyframes damageFlash{0%{box-shadow:inset 0 0 0 rgba(255,85,119,0)}35%{box-shadow:inset 0 0 70px rgba(255,85,119,.55)}100%{box-shadow:inset 0 0 0 rgba(255,85,119,0)}}
+
+.problemPanel{position:relative;z-index:2;text-align:center;padding:9px 10px 0}
+.modeLabel{color:var(--muted);font-weight:1000}
+.problem{font-size:clamp(27px,6.4vw,52px);font-weight:1000;line-height:1.12;text-shadow:0 8px 24px rgba(0,0,0,.35)}
+.answerBox{
+  margin:6px auto 0;width:min(700px,94%);min-height:42px;border-radius:16px;
+  background:rgba(0,0,0,.32);border:1px solid rgba(255,255,255,.18);
+  display:flex;align-items:center;justify-content:center;padding:8px 12px;
+  font-size:clamp(22px,5.8vw,38px);font-weight:1000;white-space:nowrap;overflow:hidden;
+}
+.answerBox.wrong{box-shadow:0 0 0 3px rgba(255,85,119,.22),inset 0 0 30px rgba(255,85,119,.10)}
+.hintLine{display:none}
+.heroHpBadge{
+  position:absolute;right:8px;bottom:8px;z-index:5;min-width:96px;text-align:center;
+  padding:6px 8px;border-radius:12px;background:linear-gradient(180deg,rgba(255,255,255,.18),rgba(0,0,0,.38));
+  border:1px solid rgba(255,255,255,.26);box-shadow:0 8px 18px rgba(0,0,0,.28),inset 0 1px 0 rgba(255,255,255,.16);
+  font-weight:1000;color:#fff4cf;text-shadow:0 2px 4px rgba(0,0,0,.45);font-size:13px;
+}
+.heroHpBadge span{display:inline-block;min-width:1.2em;color:#87ffb6;font-size:1.2em}
+.heroHpBadge.debugReady{
+  background:linear-gradient(180deg,rgba(255,233,137,.34),rgba(129,82,0,.54));
+  border-color:rgba(255,233,137,.72);color:#fff6bd;box-shadow:0 0 18px rgba(255,233,137,.45),0 8px 18px rgba(0,0,0,.28);
+}
+.heroHpBadge.debugReady::after{content:" 答え";color:#ffe989;font-weight:1000}
+
+.stage{position:relative;z-index:1;height:135px;background:radial-gradient(ellipse at 50% 88%,rgba(255,255,255,.13),transparent 38%)}
+.hero{display:none}
+.enemyWrap{position:absolute;left:50%;transform:translateX(-50%);bottom:0;width:142px;height:132px;display:grid;place-items:center}
+.hp{
+  position:absolute;right:0;top:0;left:0;margin:auto;width:138px;height:14px;border-radius:999px;
+  background:rgba(0,0,0,.40);border:1px solid rgba(255,255,255,.18);overflow:hidden;z-index:5;
+}
+.hpFill{height:100%;width:100%;background:linear-gradient(90deg,#87ffb6,#44d676);transition:width .16s ease}
+.enemy{width:112px;height:112px;position:relative;z-index:2;transform-origin:center bottom;transition:filter .1s ease;animation:float 2.4s ease-in-out infinite}
+.enemySvg{width:100%;height:100%;display:block;overflow:visible;filter:drop-shadow(0 10px 12px rgba(0,0,0,.28))}
+.enemy.strong::before{
+  content:"";position:absolute;inset:-10px;border-radius:50%;border:3px solid rgba(183,132,255,.40);
+  box-shadow:0 0 22px rgba(183,132,255,.55);animation:aura 1s linear infinite;z-index:-1;pointer-events:none;
+}
+@keyframes aura{from{transform:rotate(0) scale(.95)}to{transform:rotate(360deg) scale(1.05)}}
+@keyframes float{0%,100%{transform:translateY(0)}50%{transform:translateY(-7px)}}
+.enemy.hit{animation:hit .22s ease both;filter:brightness(1.8) drop-shadow(0 0 18px rgba(255,233,137,.75))}
+@keyframes hit{0%{transform:translateX(0) scale(1)}35%{transform:translateX(9px) scale(.96)}70%{transform:translateX(-7px) scale(1.05)}100%{transform:translateX(0) scale(1)}}
+.enemy.defeat{animation:purify .30s ease-out both}
+@keyframes purify{0%{opacity:1;transform:scale(1) rotate(0)}45%{filter:brightness(2.5) drop-shadow(0 0 30px rgba(255,255,255,.95));transform:scale(1.22) rotate(6deg)}100%{opacity:0;transform:scale(.25) rotate(20deg) translateY(-42px)}}
+.enemy.attack{animation:enemyAttack .42s cubic-bezier(.2,1.4,.25,1) both;filter:brightness(1.65) drop-shadow(0 0 24px rgba(255,85,119,.9))}
+.enemy.attack .enemySvg{filter:drop-shadow(0 18px 18px rgba(0,0,0,.35)) saturate(1.35)}
+@keyframes enemyAttack{0%{transform:translateY(0) scale(1)}28%{transform:translateY(-14px) scale(1.24)}62%{transform:translateY(24px) scale(1.48)}100%{transform:translateY(0) scale(1)}}
+.beam{
+  position:absolute;left:50%;bottom:48px;width:170px;height:170px;border-radius:50%;
+  transform:translateX(-50%) scale(.4);
+  background:radial-gradient(circle,rgba(255,255,255,.95),rgba(255,233,137,.55) 28%,rgba(255,233,137,.12) 58%,transparent 72%);
+  box-shadow:0 0 34px rgba(255,233,137,.85);opacity:0;pointer-events:none;
+}
+.beam.fire{animation:beam .22s ease both}
+@keyframes beam{0%{opacity:0;transform:translateX(-50%) scale(.35)}35%{opacity:1;transform:translateX(-50%) scale(.85)}100%{opacity:0;transform:translateX(-50%) scale(1.08)}}
+.spark{position:absolute;width:10px;height:10px;border-radius:50%;background:#fff;box-shadow:0 0 16px #ffe989;pointer-events:none;animation:spark .45s ease-out both}
+@keyframes spark{to{opacity:0;transform:translate(var(--dx),var(--dy)) scale(.2)}}
+
+.keypad{
+  display:grid;grid-template-columns:repeat(4,1fr);grid-template-rows:repeat(4,clamp(52px,14.4vw,66px));
+  grid-template-areas:"x2 n7 n8 n9" "x2 n4 n5 n6" "x n1 n2 n3" "x plus minus n0";
+  gap:8px;width:min(440px,calc(100vw - 20px));margin:0 auto;align-items:stretch;
+}
+.key{
+  min-height:0;width:100%;height:100%;border-radius:16px;background:linear-gradient(180deg,var(--btn2),var(--btn));
+  border:1px solid rgba(255,255,255,.17);box-shadow:0 8px 0 rgba(0,0,0,.25),0 13px 18px rgba(0,0,0,.17);
+  font-size:clamp(20px,5vw,34px);font-weight:1000;transition:transform .06s ease,filter .12s ease;
+}
+.key.op{background:linear-gradient(180deg,#4b3e8f,#2e285e)}
+.key.tall{font-size:clamp(26px,7vw,42px)}
+.key.spacer{visibility:hidden;pointer-events:none;box-shadow:none}
+.area-x2{grid-area:x2}.area-x{grid-area:x}.area-plus{grid-area:plus}.area-minus{grid-area:minus}.area-1{grid-area:n1}.area-2{grid-area:n2}.area-3{grid-area:n3}.area-4{grid-area:n4}.area-5{grid-area:n5}.area-6{grid-area:n6}.area-7{grid-area:n7}.area-8{grid-area:n8}.area-9{grid-area:n9}.area-0{grid-area:n0}
+
+.resultTitle{text-align:center;font-size:clamp(32px,7vw,60px);margin:0 0 10px;text-shadow:0 8px 0 rgba(0,0,0,.28)}
+.resultGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:8px;margin:12px 0}
+.resultItem{background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.15);border-radius:14px;padding:9px 10px;text-align:center}
+.resultItem .label{color:var(--muted);font-weight:800;font-size:13px}
+.resultItem .value{display:block;margin-top:2px;font-size:clamp(22px,5vw,34px);font-weight:1000}
+.bestResult{
+  margin:8px 0 10px;padding:11px 12px;border-radius:16px;
+  background:linear-gradient(180deg,rgba(255,233,137,.20),rgba(255,255,255,.07));
+  border:1px solid rgba(255,233,137,.32);color:#fff3b0;text-align:center;font-weight:1000;line-height:1.5;
+}
+.breakdown{color:#efe9ff;line-height:1.55;font-weight:750;background:rgba(0,0,0,.22);border-radius:14px;padding:10px 12px;font-size:14px}
+.toast{
+  position:fixed;left:50%;top:18px;transform:translateX(-50%) translateY(-18px);opacity:0;
+  background:linear-gradient(135deg,#ffe989,#ffb84f);color:#241300;border-radius:999px;padding:12px 18px;
+  box-shadow:0 14px 34px rgba(0,0,0,.32);font-weight:1000;z-index:50;pointer-events:none;
+}
+.toast.show{animation:toast .9s ease both}
+@keyframes toast{0%{opacity:0;transform:translateX(-50%) translateY(-18px) scale(.92)}18%,75%{opacity:1;transform:translateX(-50%) translateY(0) scale(1)}100%{opacity:0;transform:translateX(-50%) translateY(-8px) scale(.98)}}
+
+@media (max-width:720px){
+  .app{padding:9px}.card{padding:13px}.modeGrid{grid-template-columns:repeat(2,minmax(0,1fr));gap:9px}
+  .modeBtn{min-height:96px;padding:11px}.modeName{font-size:clamp(15px,4vw,22px)}.modeDesc{font-size:12px}
+  .topBar{grid-template-columns:1fr 1fr}.topBar .timeWrap{grid-column:1/-1;order:3}
+}
+</style>
+</head>
+<body>
+<div class="app">
+  <main id="menuScreen" class="screen active menuScreen">
+    <button id="bestOpen" class="cornerBtn">自己ベスト</button>
+    <h1 class="title">展開<br>ライトニング</h1>
+    <p class="subtitle">出てきた因数分解の式を展開し、正しい順番でボタンを押して悪魔を浄化しよう。</p>
+    <section id="menuCard" class="card">
+      <div class="modeGrid">
+        <button class="modeBtn" data-mode="basic"><span class="modeName">小悪魔モード</span><span class="modeDesc">(x+a)(x+b)<br>基本の展開。</span></button>
+        <button class="modeBtn" data-mode="square"><span class="modeName">重装悪魔モード</span><span class="modeDesc">(x+a)²<br>二乗パターン。</span></button>
+        <button class="modeBtn" data-mode="diff"><span class="modeName">仮面悪魔モード</span><span class="modeDesc">(x+a)(x-a)<br>差の平方。</span></button>
+        <button class="modeBtn" data-mode="rush"><span class="modeName">ラッシュモード</span><span class="modeDesc">3種類が全員出現。<br>8体撃破で強化解放。</span></button>
+      </div>
+      <div class="menuActions">
+        <button id="strongToggle" class="pillBtn strong">強化モード：未解放</button>
+        <button id="soundToggle" class="pillBtn">音：ON</button>
+        <button id="limitToggle" class="pillBtn limit">極限モード：OFF</button>
+      </div>
+      <div id="unlockNote" class="unlockNote"></div>
+      <p class="small">入力ルール：答えは x² → xの項 → 定数項 の順番。係数1は「1x」ではなく「x」。因数側の0は出ません。同じ60秒内では全パターンを使い切るまで同じ問題は出ません。スコアは攻撃成功・撃破・連続撃破・極限撃破・残り体力で加算されます。極限モードは体力1で挑み、撃破ごとに+100点です。</p>
+    </section>
+  </main>
+
+  <main id="gameScreen" class="screen">
+    <section class="gameShell">
+      <div class="topBar">
+        <div class="timeWrap"><div id="timeFill" class="timeFill"></div><div id="timeLabel" class="timeLabel">60.0</div></div>
+        <div class="stat">撃破 <span id="killCount">0</span></div>
+        <div class="stat">得点 <span id="scoreNow">0</span></div>
+      </div>
+      <section class="battle">
+        <div id="countdownOverlay" class="countdownOverlay" hidden>3</div>
+        <div class="problemPanel">
+          <div id="modeLabel" class="modeLabel"></div>
+          <div id="problem" class="problem"></div>
+          <div id="answerBox" class="answerBox">?</div>
+          <div id="hintLine" class="hintLine"></div>
+        </div>
+        <div id="heroHpBadge" class="heroHpBadge">自分の体力 <span id="heroHp">5</span></div>
+        <div class="stage">
+          <div class="hero"><div class="heroCore"></div></div>
+          <div id="beam" class="beam"></div>
+          <div class="enemyWrap">
+            <div class="hp"><div id="hpFill" class="hpFill"></div></div>
+            <div id="enemy" class="enemy basic"></div>
+          </div>
+        </div>
+      </section>
+      <section class="keypad" id="keypad"></section>
+      <div class="menuActions"><button id="giveUp" class="pillBtn danger">終了して結果へ</button></div>
+    </section>
+  </main>
+
+  <main id="resultScreen" class="screen">
+    <section class="card">
+      <h2 class="resultTitle">リザルト</h2>
+      <div class="resultGrid">
+        <div class="resultItem"><span class="label">撃破数</span><span id="resultKills" class="value">0</span></div>
+        <div class="resultItem"><span class="label">総合スコア</span><span id="resultScore" class="value">0</span></div>
+        <div class="resultItem"><span class="label">ミス入力</span><span id="resultMiss" class="value">0</span></div>
+        <div class="resultItem"><span class="label">最大コンボ</span><span id="resultCombo" class="value">0</span></div>
+      </div>
+      <div id="bestResult" class="bestResult"></div>
+      <div id="breakdown" class="breakdown"></div>
+      <div class="menuActions">
+        <button id="retry" class="pillBtn primary">もう一度</button>
+        <button id="backMenu" class="pillBtn">モード選択へ</button>
+      </div>
+    </section>
+  </main>
+</div>
+
+<div id="bestModal" class="bestModal" hidden>
+  <div class="bestModalCard">
+    <div class="bestModalHeader">
+      <div>
+        <div class="bestModalTitle">自己ベスト</div>
+        <div id="bestUnlockStatus" class="bestUnlockStatus">強化モード：確認中</div>
+      </div>
+      <button id="bestClose" class="bestClose">×</button>
+    </div>
+    <div id="bestModalBody" class="bestModalBody"></div>
+  </div>
+</div>
+
+<div id="toast" class="toast"></div>
+
+<script>
+(() => {
+  "use strict";
+
+  const STORAGE_KEY = "factor-demon-strong-unlocked-v1";
+  const BEST_KEY = "factor-demon-best-records-v1";
+
+  const screens = {
+    menu: document.getElementById("menuScreen"),
+    game: document.getElementById("gameScreen"),
+    result: document.getElementById("resultScreen")
+  };
+
+  const els = {
+    menuCard: document.getElementById("menuCard"),
+    countdownOverlay: document.getElementById("countdownOverlay"),
+    strongToggle: document.getElementById("strongToggle"),
+    soundToggle: document.getElementById("soundToggle"),
+    limitToggle: document.getElementById("limitToggle"),
+    unlockNote: document.getElementById("unlockNote"),
+    bestOpen: document.getElementById("bestOpen"),
+    bestModal: document.getElementById("bestModal"),
+    bestClose: document.getElementById("bestClose"),
+    bestModalBody: document.getElementById("bestModalBody"),
+    bestUnlockStatus: document.getElementById("bestUnlockStatus"),
+    timeFill: document.getElementById("timeFill"),
+    timeLabel: document.getElementById("timeLabel"),
+    heroHpBadge: document.getElementById("heroHpBadge"),
+    heroHp: document.getElementById("heroHp"),
+    killCount: document.getElementById("killCount"),
+    scoreNow: document.getElementById("scoreNow"),
+    modeLabel: document.getElementById("modeLabel"),
+    problem: document.getElementById("problem"),
+    answerBox: document.getElementById("answerBox"),
+    hintLine: document.getElementById("hintLine"),
+    enemy: document.getElementById("enemy"),
+    hpFill: document.getElementById("hpFill"),
+    beam: document.getElementById("beam"),
+    keypad: document.getElementById("keypad"),
+    giveUp: document.getElementById("giveUp"),
+    resultKills: document.getElementById("resultKills"),
+    resultScore: document.getElementById("resultScore"),
+    resultMiss: document.getElementById("resultMiss"),
+    resultCombo: document.getElementById("resultCombo"),
+    bestResult: document.getElementById("bestResult"),
+    breakdown: document.getElementById("breakdown"),
+    retry: document.getElementById("retry"),
+    backMenu: document.getElementById("backMenu"),
+    toast: document.getElementById("toast")
+  };
+
+  const state = {
+    screen: "menu",
+    mode: "rush",
+    strongUnlocked: localStorage.getItem(STORAGE_KEY) === "true",
+    strong: false,
+    limitMode: false,
+    activeModeInfo: null,
+    sound: true,
+    soundToggleCount: 0,
+    bgmTimer: null,
+    bgmStep: 0,
+    bgmPlaying: false,
+    running: false,
+    ending: false,
+    debugAnswerUnlocked: false,
+    hpPressTimer: null,
+    startAt: 0,
+    durationMs: 60000,
+    raf: null,
+    countdownToken: 0,
+    current: null,
+    input: [],
+    problemDeck: [],
+    deckCycle: 1,
+    heroHp: 5,
+    endReason: "",
+    warned30: false,
+    warned10: false,
+    kills: 0,
+    score: 0,
+    miss: 0,
+    combo: 0,
+    maxCombo: 0,
+    defeatedScore: 0,
+    comboScore: 0,
+    tokenScore: 0,
+    extremeBonus: 0,
+    healthBonus: 0,
+    lastMode: "rush"
+  };
+
+  const modeNames = {
+    basic: "小悪魔",
+    square: "重装悪魔",
+    diff: "仮面悪魔",
+    rush: "ラッシュ"
+  };
+
+  function bestModeKey(mode = state.mode, strong = state.strong){
+    return `${strong ? "strong" : "normal"}:${mode}`;
+  }
+  function modeBestLabel(mode, strong){
+    return `${strong ? "強化" : "通常"} / ${modeNames[mode]}モード`;
+  }
+  function loadBestRecords(){
+    try{return JSON.parse(localStorage.getItem(BEST_KEY) || "{}") || {};}catch(e){return {};}
+  }
+  function saveBestRecords(records){
+    localStorage.setItem(BEST_KEY, JSON.stringify(records));
+  }
+  function isBetterRecord(newRecord, oldRecord){
+    if(!oldRecord) return true;
+    if(newRecord.kills !== oldRecord.kills) return newRecord.kills > oldRecord.kills;
+    return newRecord.score > oldRecord.score;
+  }
+  function getBestRecord(mode = state.mode, strong = state.strong){
+    return loadBestRecords()[bestModeKey(mode, strong)] || null;
+  }
+  function updateBestRecord(){
+    const records = loadBestRecords();
+    const key = bestModeKey();
+    const oldRecord = records[key] || null;
+    const newRecord = {
+      mode: state.mode,
+      strong: state.strong,
+      kills: state.kills,
+      score: state.score,
+      miss: state.miss,
+      combo: state.maxCombo,
+      savedAt: new Date().toISOString()
+    };
+    const updated = isBetterRecord(newRecord, oldRecord);
+    if(updated){
+      records[key] = newRecord;
+      saveBestRecords(records);
+    }
+    return {updated, oldRecord, bestRecord: records[key] || newRecord};
+  }
+  function recordText(record){
+    if(!record) return "記録なし";
+    return `${record.kills}体 / ${record.score}点`;
+  }
+  function renderBestModal(){
+    const modes = ["basic", "square", "diff", "rush"];
+    const makeSection = (strong) => {
+      const rows = modes.map(m => {
+        const rec = getBestRecord(m, strong);
+        const detail = rec
+          ? `${rec.kills}体 / ${rec.score}点<br><small>ミス:${rec.miss}　最大コンボ:${rec.combo}</small>`
+          : `記録なし<br><small>まだ遊んでいません</small>`;
+        return `<div class="bestRow"><strong>${modeNames[m]}</strong><br>${detail}</div>`;
+      }).join("");
+      return `
+        <div class="bestSection">
+          <div class="bestSectionTitle">${strong ? "強化モード" : "通常モード"}</div>
+          <div class="bestRows">${rows}</div>
+        </div>
+      `;
+    };
+
+    els.bestUnlockStatus.textContent = `強化モード：${state.strongUnlocked ? "解放済み" : "未解放"}`;
+    els.bestModalBody.innerHTML = makeSection(false) + makeSection(true);
+  }
+
+  function openBestModal(){
+    renderBestModal();
+    els.bestModal.hidden = false;
+  }
+
+  function closeBestModal(){
+    els.bestModal.hidden = true;
+  }
+
+  const keys = [
+    {label:"x²", className:"op tall area-x2"},
+    {label:"1", className:"area-1"},
+    {label:"2", className:"area-2"},
+    {label:"3", className:"area-3"},
+    {label:"4", className:"area-4"},
+    {label:"5", className:"area-5"},
+    {label:"6", className:"area-6"},
+    {label:"x", className:"op tall area-x"},
+    {label:"7", className:"area-7"},
+    {label:"8", className:"area-8"},
+    {label:"9", className:"area-9"},
+    {label:"+", className:"op area-plus"},
+    {label:"-", className:"op area-minus"},
+    {label:"0", className:"area-0"}
+  ];
+
+  function showScreen(name){
+    Object.values(screens).forEach(s => s.classList.remove("active"));
+    screens[name].classList.add("active");
+    state.screen = name;
+  }
+  function randInt(min,max){return Math.floor(Math.random()*(max-min+1))+min;}
+  function nonZeroRand(min,max){let n=0;while(n===0)n=randInt(min,max);return n;}
+  function signNum(n){return n>0 ? "+"+n : String(n);}
+  function factorLinear(coef, constant){
+    const xPart = coef === 1 ? "x" : coef + "x";
+    return "(" + xPart + signNum(constant) + ")";
+  }
+  function sameFactor(base){return base + "²";}
+
+  function formatFactorText(p){
+    if(p.customText) return p.customText;
+    if(p.kind === "basic") return factorLinear(1, p.a) + factorLinear(1, p.b);
+    if(p.kind === "square") return sameFactor(factorLinear(p.coef || 1, p.a));
+    if(p.kind === "diff"){
+      const c = p.coef || 1;
+      return factorLinear(c, p.a) + factorLinear(c, -p.a);
+    }
+    return "";
+  }
+
+  function appendTerm(tokens, coeff, variable, isFirst){
+    if(coeff === 0) return;
+    if(isFirst){ if(coeff < 0) tokens.push("-"); }
+    else tokens.push(coeff > 0 ? "+" : "-");
+    const abs = Math.abs(coeff);
+    if(variable === "x²"){
+      if(abs !== 1) tokens.push(...String(abs).split(""));
+      tokens.push("x²");
+    }else if(variable === "x"){
+      if(abs !== 1) tokens.push(...String(abs).split(""));
+      tokens.push("x");
+    }else{
+      tokens.push(...String(abs).split(""));
+    }
+  }
+
+  function expressionTokens(A,B,C){
+    const tokens = [];
+    appendTerm(tokens, A, "x²", tokens.length === 0);
+    appendTerm(tokens, B, "x", tokens.length === 0);
+    appendTerm(tokens, C, "", tokens.length === 0);
+    if(tokens.length === 0) tokens.push("0");
+    return tokens;
+  }
+
+  function shuffleArray(arr){
+    for(let i=arr.length-1;i>0;i--){
+      const j=Math.floor(Math.random()*(i+1));
+      [arr[i],arr[j]]=[arr[j],arr[i]];
+    }
+    return arr;
+  }
+
+  function buildProblemSpec(kind, a, b, coef){
+    let A,B,C;
+    if(!state.strong){
+      if(kind === "basic"){
+        A=1; B=a+b; C=a*b; return {kind,a,b,A,B,C};
+      }
+      if(kind === "square"){
+        A=1; B=2*a; C=a*a; return {kind,a,coef:1,A,B,C};
+      }
+      A=1; B=0; C=-a*a; return {kind,a,coef:1,A,B,C};
+    }
+
+    // 強化：左右のx係数は同じ。係数2〜4、x項は60以下。
+    coef = coef || 2;
+    if(kind === "basic"){
+      A=coef*coef; B=coef*(a+b); C=a*b;
+      return {kind,a,b,coef,A,B,C,customText:factorLinear(coef,a)+factorLinear(coef,b)};
+    }
+    if(kind === "square"){
+      A=coef*coef; B=2*coef*a; C=a*a;
+      return {kind,a,coef,A,B,C};
+    }
+    A=coef*coef; B=0; C=-a*a;
+    return {kind,a,coef,A,B,C};
+  }
+
+  function isAllowedProblemSpec(spec){
+    if(state.strong && Math.abs(spec.B) > 60) return false;
+    return true;
+  }
+
+  function buildKindDeck(kind){
+    const deck = [];
+    const coeffs = state.strong ? [2,3,4] : [1];
+    if(kind === "basic"){
+      for(const coef of coeffs){
+        for(let a=-9;a<=9;a++){
+          if(a===0) continue;
+          for(let b=-9;b<=9;b++){
+            if(b===0) continue;
+            if(a===b || a===-b) continue;
+            if(a>b) continue;
+            const spec = buildProblemSpec(kind,a,b,coef);
+            if(isAllowedProblemSpec(spec)) deck.push(spec);
+          }
+        }
+      }
+      return deck;
+    }
+    if(kind === "square"){
+      for(const coef of coeffs){
+        for(let a=-9;a<=9;a++){
+          if(a===0) continue;
+          const spec = buildProblemSpec(kind,a,null,coef);
+          if(isAllowedProblemSpec(spec)) deck.push(spec);
+        }
+      }
+      return deck;
+    }
+    if(kind === "diff"){
+      for(const coef of coeffs){
+        for(let a=1;a<=9;a++){
+          const spec = buildProblemSpec(kind,a,null,coef);
+          if(isAllowedProblemSpec(spec)) deck.push(spec);
+        }
+      }
+    }
+    return deck;
+  }
+
+  function buildProblemDeck(){
+    const kinds = state.mode === "rush" ? ["basic","square","diff"] : [state.mode];
+    let deck = [];
+    for(const kind of kinds) deck = deck.concat(buildKindDeck(kind));
+    return shuffleArray(deck);
+  }
+
+  function makeProblem(p){
+    return {...p, factorText: formatFactorText(p), answerTokens: expressionTokens(p.A,p.B,p.C)};
+  }
+
+  function generateProblem(){
+    if(!state.problemDeck || state.problemDeck.length === 0){
+      state.problemDeck = buildProblemDeck();
+      state.deckCycle++;
+    }
+    const spec = state.problemDeck.pop();
+    return makeProblem(spec || buildProblemDeck().pop());
+  }
+
+  function enemySvg(kind, mood = "normal"){
+    const grin = mood === "grin";
+    if(kind === "square"){
+      const mouth = grin
+        ? `<path d="M42 79 Q60 96 78 79" fill="none" stroke="#dfffff" stroke-width="7" stroke-linecap="round"/>`
+        : `<rect x="45" y="83" width="30" height="7" rx="4" fill="#9ee7ff"/>`;
+      const eyes = grin
+        ? `<path d="M35 57 Q43 50 51 57" fill="none" stroke="#8effff" stroke-width="6" stroke-linecap="round"/><path d="M69 57 Q77 50 85 57" fill="none" stroke="#8effff" stroke-width="6" stroke-linecap="round"/>`
+        : `<circle cx="43" cy="58" r="8" fill="#8effff"/><circle cx="77" cy="58" r="8" fill="#8effff"/>`;
+      return `<svg class="enemySvg" viewBox="0 0 120 120"><path d="M30 30 L21 6 L49 23 Z" fill="#dce8ff"/><path d="M90 30 L99 6 L71 23 Z" fill="#dce8ff"/><rect x="17" y="20" width="86" height="88" rx="18" fill="#243b92" stroke="#9ed8ff" stroke-width="5"/><rect x="31" y="40" width="58" height="43" rx="11" fill="#3e57b8" stroke="rgba(255,255,255,.25)" stroke-width="3"/>${eyes}${mouth}</svg>`;
+    }
+    if(kind === "diff"){
+      const mouth = grin
+        ? `<path d="M43 80 Q60 98 77 80" fill="none" stroke="#ff5577" stroke-width="7" stroke-linecap="round"/>`
+        : `<path d="M45 83 Q60 72 75 83" fill="none" stroke="#ff5577" stroke-width="6" stroke-linecap="round"/>`;
+      const eyes = grin
+        ? `<path d="M34 58 Q42 51 50 58" fill="none" stroke="#ff5577" stroke-width="6" stroke-linecap="round"/><path d="M70 58 Q78 51 86 58" fill="none" stroke="#ff5577" stroke-width="6" stroke-linecap="round"/>`
+        : `<ellipse cx="42" cy="58" rx="9" ry="6" fill="#ff5577"/><ellipse cx="78" cy="58" rx="9" ry="6" fill="#ff5577"/>`;
+      return `<svg class="enemySvg" viewBox="0 0 120 120"><path d="M28 32 L16 7 L45 24 Z" fill="#270036"/><path d="M92 32 L104 7 L75 24 Z" fill="#f4f1ff"/><path d="M60 17 A47 47 0 1 0 60 111 Z" fill="#270036" stroke="rgba(255,255,255,.30)" stroke-width="4"/><path d="M60 17 A47 47 0 1 1 60 111 Z" fill="#f4f1ff" stroke="rgba(255,255,255,.30)" stroke-width="4"/><line x1="60" y1="20" x2="60" y2="108" stroke="rgba(0,0,0,.55)" stroke-width="4"/>${eyes}${mouth}</svg>`;
+    }
+    const mouth = grin
+      ? `<path d="M40 78 Q60 99 80 78" fill="none" stroke="#09030a" stroke-width="8" stroke-linecap="round"/>`
+      : `<path d="M45 82 Q60 94 75 82" fill="none" stroke="#09030a" stroke-width="7" stroke-linecap="round"/>`;
+    const eyes = grin
+      ? `<path d="M34 58 Q43 50 52 58" fill="none" stroke="#ffdf5b" stroke-width="7" stroke-linecap="round"/><path d="M68 58 Q77 50 86 58" fill="none" stroke="#ffdf5b" stroke-width="7" stroke-linecap="round"/>`
+      : `<ellipse cx="43" cy="58" rx="10" ry="7" fill="#ffdf5b"/><ellipse cx="77" cy="58" rx="10" ry="7" fill="#ffdf5b"/>`;
+    return `<svg class="enemySvg" viewBox="0 0 120 120"><path d="M28 31 L17 5 L44 24 Z" fill="#2a0a22"/><path d="M92 31 L103 5 L76 24 Z" fill="#2a0a22"/><path d="M18 45 C18 20 102 20 102 45 L102 78 C102 105 18 105 18 78 Z" fill="#6d1c39" stroke="rgba(255,255,255,.20)" stroke-width="4"/>${eyes}${mouth}</svg>`;
+  }
+
+  function setEnemyVisual(kind, mood = "normal"){
+    const cleanKind = (kind === "square" || kind === "diff") ? kind : "basic";
+    els.enemy.className = "enemy enemyKind-" + cleanKind + (state.strong ? " strong" : "");
+    els.enemy.dataset.kind = cleanKind;
+    els.enemy.replaceChildren();
+    const holder = document.createElement("div");
+    holder.innerHTML = enemySvg(cleanKind, mood).trim();
+    els.enemy.appendChild(holder.firstElementChild);
+  }
+
+  function isCorrectPrefix(arr){
+    if(!state.current) return true;
+    if(arr.length > state.current.answerTokens.length) return false;
+    for(let i=0;i<arr.length;i++) if(arr[i] !== state.current.answerTokens[i]) return false;
+    return true;
+  }
+  function correctPrefixLength(){
+    if(!state.current) return 0;
+    let n=0; const len=Math.min(state.input.length,state.current.answerTokens.length);
+    for(let i=0;i<len;i++){ if(state.input[i]===state.current.answerTokens[i]) n++; else break; }
+    return n;
+  }
+  function renderInput(){
+    els.answerBox.textContent = state.input.length ? state.input.join("") : "?";
+    els.answerBox.classList.toggle("wrong", !isCorrectPrefix(state.input));
+    const progress = state.current ? correctPrefixLength()/state.current.answerTokens.length : 0;
+    els.hpFill.style.width = Math.round(Math.max(0,1-progress)*100) + "%";
+  }
+
+  function newProblem(){
+    state.current = generateProblem();
+    state.input = [];
+    els.problem.textContent = state.current.factorText;
+    const modeParts = [state.strong ? "強化" : "通常"];
+    if(state.limitMode) modeParts.push("極限");
+    els.modeLabel.textContent = `${modeParts.join("+")} / ${modeNames[state.mode]}モード`;
+    setEnemyVisual(state.current.kind);
+    els.hintLine.textContent = "";
+    renderInput();
+  }
+
+  function damageEffect(){
+    els.beam.classList.remove("fire"); void els.beam.offsetWidth; els.beam.classList.add("fire");
+    els.enemy.classList.remove("hit"); void els.enemy.offsetWidth; els.enemy.classList.add("hit");
+    spawnSparks(); playTone("hit");
+  }
+  function spawnSparks(){
+    const stage = document.querySelector(".stage");
+    const rect = stage.getBoundingClientRect();
+    const baseX = rect.width*.50, baseY = rect.height*.48;
+    for(let i=0;i<7;i++){
+      const s=document.createElement("span");
+      s.className="spark"; s.style.left=baseX+randInt(-20,20)+"px"; s.style.top=baseY+randInt(-24,24)+"px";
+      s.style.setProperty("--dx",randInt(-45,45)+"px"); s.style.setProperty("--dy",randInt(-45,40)+"px");
+      stage.appendChild(s); setTimeout(()=>s.remove(),520);
+    }
+  }
+
+  function defeatEnemy(){
+    state.kills++; state.combo++; state.maxCombo=Math.max(state.maxCombo,state.combo);
+    const defeatPoint=100;
+    const comboPoint=Math.min(state.combo*20,200);
+    const extremePoint=state.limitMode ? 100 : 0;
+    state.defeatedScore += defeatPoint;
+    state.comboScore += comboPoint;
+    state.extremeBonus += extremePoint;
+    state.score += defeatPoint + comboPoint + extremePoint;
+    els.killCount.textContent = state.kills; els.scoreNow.textContent = state.score;
+    playTone("defeat");
+    els.enemy.classList.remove("hit"); els.enemy.classList.add("defeat");
+    setTimeout(()=>{ if(state.running) newProblem(); },520);
+  }
+
+  function enemyAttackEffect(){
+    const battle=document.querySelector(".battle");
+    if(battle){battle.classList.remove("damaged"); void battle.offsetWidth; battle.classList.add("damaged");}
+    const kind = state.current ? state.current.kind : (els.enemy.dataset.kind || "basic");
+    setEnemyVisual(kind,"grin");
+    els.enemy.classList.remove("attack"); void els.enemy.offsetWidth; els.enemy.classList.add("attack");
+    setTimeout(()=>{ if(state.running && state.current) setEnemyVisual(state.current.kind,"normal"); },430);
+    playTone("miss");
+  }
+
+  function takeDamage(){
+    state.heroHp = Math.max(0,state.heroHp-1);
+    els.heroHp.textContent = state.heroHp;
+    enemyAttackEffect();
+    if(state.heroHp <= 0){
+      state.endReason = "体力が0になりました。";
+      setTimeout(()=>playTone("fail"),120);
+      setTimeout(()=>endGame(false),520);
+    }
+  }
+
+  function pressCorrectAnswerButton(){
+    if(!state.running || !state.current || state.ending) return;
+    const nextExpected = state.current.answerTokens[state.input.length];
+    if(nextExpected) handleKey(nextExpected);
+  }
+  function unlockDebugAnswerButton(){
+    state.debugAnswerUnlocked = true;
+    els.heroHpBadge.classList.add("debugReady");
+    toast("デバッグ：答えボタンON");
+    playTone("start");
+  }
+
+  function handleKey(key){
+    if(!state.running || !state.current || !key || state.ending) return;
+    const nextExpected = state.current.answerTokens[state.input.length];
+    if(key === nextExpected){
+      state.input.push(key);
+
+      const attackPoint = state.strong ? 15 : 10;
+      state.tokenScore += attackPoint;
+      state.score += attackPoint;
+      els.scoreNow.textContent = state.score;
+
+      damageEffect();
+      renderInput();
+      if(state.input.length === state.current.answerTokens.length && isCorrectPrefix(state.input)) defeatEnemy();
+      return;
+    }
+    state.miss++; state.combo=0; takeDamage(); renderInput();
+  }
+
+  function renderKeypad(){
+    els.keypad.innerHTML="";
+    for(const item of keys){
+      const key=item.label;
+      const btn=document.createElement("button");
+      btn.className="key"+(item.className ? " "+item.className : "");
+      btn.textContent=key; btn.dataset.key=key;
+      btn.addEventListener("click",()=>handleKey(key));
+      els.keypad.appendChild(btn);
+    }
+  }
+
+  function hideCountdown(){els.countdownOverlay.hidden=true; els.countdownOverlay.textContent="";}
+  function showCountdownText(text){
+    els.countdownOverlay.hidden=false; els.countdownOverlay.textContent=text;
+    els.countdownOverlay.classList.remove("pop"); void els.countdownOverlay.offsetWidth; els.countdownOverlay.classList.add("pop");
+  }
+  function cancelActiveGameTimers(){
+    state.countdownToken++; state.running=false; state.ending=false;
+    if(state.hpPressTimer){clearTimeout(state.hpPressTimer); state.hpPressTimer=null;}
+    cancelAnimationFrame(state.raf); state.raf=null; stopBgm(); hideCountdown();
+  }
+  function runCountdownThenStart(token){
+    [{t:0,text:"3"},{t:1000,text:"2"},{t:2000,text:"1"}].forEach(step=>{
+      setTimeout(()=>{ if(token!==state.countdownToken || state.screen!=="game") return; showCountdownText(step.text); playTone("count"); },step.t);
+    });
+    setTimeout(()=>{
+      if(token!==state.countdownToken || state.screen!=="game") return;
+      hideCountdown(); state.running=true; state.startAt=performance.now(); playTone("start"); startBgm(); tick();
+    },3000);
+  }
+
+  function startGame(mode){
+    cancelActiveGameTimers(); primeAudio();
+    state.mode=mode; state.lastMode=mode; state.current=null; state.input=[]; state.ending=false;
+    state.debugAnswerUnlocked=false;
+    if(state.hpPressTimer){clearTimeout(state.hpPressTimer); state.hpPressTimer=null;}
+    els.heroHpBadge.classList.remove("debugReady");
+    state.problemDeck=[]; state.deckCycle=1; state.heroHp=state.limitMode ? 1 : 5; state.endReason="";
+    state.warned30=false; state.warned10=false;
+    state.kills=0; state.score=0; state.miss=0; state.combo=0; state.maxCombo=0;
+    state.defeatedScore=0; state.comboScore=0; state.tokenScore=0; state.extremeBonus=0; state.healthBonus=0;
+    els.heroHp.textContent=String(state.heroHp); els.killCount.textContent="0"; els.scoreNow.textContent="0";
+    els.timeLabel.textContent="60.0"; els.timeLabel.classList.remove("timeWarn","timeDanger");
+    els.timeFill.style.width="100%";
+    state.problemDeck = buildProblemDeck();
+    showScreen("game"); newProblem();
+    const token = ++state.countdownToken;
+    runCountdownThenStart(token);
+  }
+
+  function triggerTimeWarning(kind){
+    const cls = kind === "danger" ? "timeDanger" : "timeWarn";
+    els.timeLabel.classList.remove("timeWarn","timeDanger"); void els.timeLabel.offsetWidth; els.timeLabel.classList.add(cls);
+    playTone(kind === "danger" ? "time10" : "time30");
+  }
+  function tick(){
+    if(!state.running) return;
+    const elapsed=performance.now()-state.startAt;
+    const remain=Math.max(0,state.durationMs-elapsed);
+    const sec=remain/1000;
+    els.timeLabel.textContent=sec.toFixed(1);
+    els.timeFill.style.width=(remain/state.durationMs*100)+"%";
+    if(!state.warned30 && sec<=30){state.warned30=true; triggerTimeWarning("warn");}
+    if(!state.warned10 && sec<=10){state.warned10=true; triggerTimeWarning("danger");}
+    if(remain<=0){playTone("timeup"); endGame(false); return;}
+    state.raf=requestAnimationFrame(tick);
+  }
+
+  function endGame(manual){
+    if(state.ending || state.screen === "result") return;
+    state.ending=true; state.countdownToken++; state.running=false;
+    cancelAnimationFrame(state.raf); state.raf=null; hideCountdown(); stopBgm();
+    if(manual){showResult(manual); return;}
+    setTimeout(()=>showResult(manual),2000);
+  }
+
+  function showResult(manual){
+    if(state.screen === "result") return;
+    state.healthBonus = Math.max(0, state.heroHp) * 100;
+    state.score += state.healthBonus;
+    let unlockedNow=false;
+    if(state.mode==="rush" && state.kills>=8 && !state.strongUnlocked){
+      state.strongUnlocked=true; localStorage.setItem(STORAGE_KEY,"true"); unlockedNow=true;
+    }
+    els.scoreNow.textContent = state.score;
+    const bestInfo = updateBestRecord();
+    els.resultKills.textContent=state.kills; els.resultScore.textContent=state.score;
+    els.resultMiss.textContent=state.miss; els.resultCombo.textContent=state.maxCombo;
+    els.bestResult.innerHTML = bestInfo.updated
+      ? `自己ベスト更新！<br>${modeBestLabel(state.mode,state.strong)}：${recordText(bestInfo.bestRecord)}`
+      : `自己ベスト<br>${modeBestLabel(state.mode,state.strong)}：${recordText(bestInfo.bestRecord)}`;
+    els.breakdown.innerHTML=[
+      `攻撃成功点：${state.tokenScore} 点`,
+      `撃破点：${state.defeatedScore} 点`,
+      `連続撃破ボーナス：${state.comboScore} 点`,
+      `極限モードボーナス：${state.extremeBonus} 点`,
+      `残り体力ボーナス：${state.healthBonus} 点`,
+      unlockedNow ? `<strong>強化モード解放！</strong>` : "",
+      state.endReason ? state.endReason : (manual ? `途中終了しました。` : `60秒終了。`)
+    ].filter(Boolean).join("<br>");
+    stopBgm(); updateMenu(); showScreen("result");
+    if(unlockedNow) toast("強化モード解放！");
+    playTone("result");
+  }
+
+  function updateMenu(){
+    els.menuCard.classList.toggle("strongOn",state.strong);
+    els.menuCard.classList.toggle("limitOn",state.limitMode);
+
+    const strongMessage = "強化モード：両方のxに同じ係数がつく問題が出ます。";
+    const limitMessage = "極限モード：体力が1になる代わりに、撃破点が激増します。";
+
+    if(state.strongUnlocked){
+      els.strongToggle.disabled=false;
+      els.strongToggle.textContent=state.strong ? "強化モード：ON" : "強化モード：OFF";
+
+      if(state.strong && state.limitMode){
+        els.unlockNote.textContent = state.activeModeInfo === "limit" ? limitMessage : strongMessage;
+      }else if(state.strong){
+        els.unlockNote.textContent = strongMessage;
+      }else if(state.limitMode){
+        els.unlockNote.textContent = limitMessage;
+      }else{
+        els.unlockNote.textContent = "強化モード解放済み。押すと通常/強化を切り替えます。";
+      }
+    }else{
+      state.strong=false;
+      els.strongToggle.disabled=true;
+      els.strongToggle.textContent="強化モード：未解放";
+
+      if(state.limitMode){
+        els.unlockNote.textContent = limitMessage;
+      }else{
+        els.unlockNote.textContent="ラッシュモードで8体以上撃破すると強化モードが解放されます。";
+      }
+    }
+
+    els.soundToggle.textContent=state.sound ? "音：ON" : "音：OFF";
+    els.limitToggle.textContent = state.limitMode ? "極限モード：ON" : "極限モード：OFF";
+    els.limitToggle.classList.toggle("on", state.limitMode);
+
+    // OFF状態はグレーアウト風にする。未解放の強化ボタンはdisabled側の見た目を優先。
+    els.strongToggle.classList.toggle("off", state.strongUnlocked && !state.strong);
+    els.limitToggle.classList.toggle("off", !state.limitMode);
+    els.soundToggle.classList.toggle("off", !state.sound);
+  }
+
+  function toast(text){
+    els.toast.textContent=text; els.toast.classList.remove("show"); void els.toast.offsetWidth; els.toast.classList.add("show");
+  }
+
+  let audioCtx=null;
+  function getAudio(){
+    if(!state.sound) return null;
+    if(!audioCtx) audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+    if(audioCtx.state === "suspended") audioCtx.resume().catch(()=>{});
+    return audioCtx;
+  }
+  function primeAudio(){
+    const ctx=getAudio();
+    if(ctx && ctx.state==="suspended") ctx.resume().catch(()=>{});
+  }
+  function playOsc(ctx,start,freq,endFreq,dur,type,vol,dest){
+    const osc=ctx.createOscillator(), gain=ctx.createGain();
+    osc.type=type; osc.frequency.setValueAtTime(Math.max(1,freq),start);
+    if(endFreq && endFreq!==freq) osc.frequency.exponentialRampToValueAtTime(Math.max(1,endFreq),start+dur);
+    gain.gain.setValueAtTime(0.0001,start);
+    gain.gain.exponentialRampToValueAtTime(vol,start+0.012);
+    gain.gain.exponentialRampToValueAtTime(0.0001,start+dur);
+    osc.connect(gain).connect(dest||ctx.destination);
+    osc.start(start); osc.stop(start+dur+0.04);
+  }
+  function playNoise(ctx,start,dur,vol,dest){
+    const bufferSize=Math.max(1,Math.floor(ctx.sampleRate*dur));
+    const buffer=ctx.createBuffer(1,bufferSize,ctx.sampleRate);
+    const data=buffer.getChannelData(0);
+    for(let i=0;i<bufferSize;i++) data[i]=(Math.random()*2-1)*(1-i/bufferSize);
+    const src=ctx.createBufferSource(), gain=ctx.createGain(), filter=ctx.createBiquadFilter();
+    filter.type="highpass"; filter.frequency.setValueAtTime(900,start);
+    gain.gain.setValueAtTime(vol,start); gain.gain.exponentialRampToValueAtTime(0.0001,start+dur);
+    src.buffer=buffer; src.connect(filter).connect(gain).connect(dest||ctx.destination);
+    src.start(start); src.stop(start+dur+0.02);
+  }
+  function playTone(type){
+    const ctx=getAudio(); if(!ctx) return;
+    const now=ctx.currentTime+0.01;
+    const master=ctx.createGain(), comp=ctx.createDynamicsCompressor();
+    master.gain.setValueAtTime(0.78,now); master.connect(comp).connect(ctx.destination);
+    if(type==="hit"){
+      [783.99,1174.66,1567.98,2349.32].forEach((f,i)=>playOsc(ctx,now+i*.012,f,f*1.18,.16,i%2?"sine":"triangle",.044-i*.004,master));
+      playOsc(ctx,now,3135.96,4186.01,.10,"sine",.020,master); playNoise(ctx,now+.015,.08,.012,master); return;
+    }
+    if(type==="count"){playOsc(ctx,now,523.25,659.25,.12,"triangle",.040,master); playOsc(ctx,now,1046.5,1318.5,.10,"sine",.018,master); return;}
+    if(type==="start"){[523.25,659.25,783.99,1046.5].forEach((f,i)=>{playOsc(ctx,now+i*.018,f,f*1.08,.18,"triangle",.045,master)}); return;}
+    if(type==="time30"){playOsc(ctx,now,392,392,.20,"triangle",.060,master); playOsc(ctx,now+.06,784,784,.18,"sine",.035,master); playOsc(ctx,now+.18,523.25,523.25,.22,"triangle",.050,master); return;}
+    if(type==="time10"){playOsc(ctx,now,196,130.81,.32,"sawtooth",.075,master); playOsc(ctx,now,987.77,1567.98,.20,"triangle",.045,master); playOsc(ctx,now+.18,1174.66,1760,.22,"triangle",.050,master); playNoise(ctx,now+.04,.12,.018,master); return;}
+    if(type==="timeup"){playOsc(ctx,now,880,880,.18,"square",.070,master); playOsc(ctx,now+.22,880,880,.28,"square",.075,master); playOsc(ctx,now,1760,1760,.15,"sine",.025,master); playOsc(ctx,now+.22,1760,1760,.22,"sine",.025,master); return;}
+    if(type==="fail"){playOsc(ctx,now,392,196,.38,"sawtooth",.080,master); playOsc(ctx,now+.08,247,110,.45,"triangle",.060,master); playOsc(ctx,now+.28,98,65,.34,"square",.040,master); return;}
+    if(type==="miss"){playOsc(ctx,now,150,82,.16,"sawtooth",.070,master); playOsc(ctx,now+.015,90,55,.18,"square",.035,master); return;}
+    if(type==="defeat"){[523.25,659.25,783.99,1046.5,1318.5].forEach((f,i)=>playOsc(ctx,now+i*.045,f,f*1.25,.18,i%2?"sine":"triangle",.060-i*.006,master)); playNoise(ctx,now+.08,.18,.020,master); return;}
+    if(type==="result"){[392,523.25,659.25,783.99].forEach((f,i)=>{playOsc(ctx,now+i*.075,f,f,.22,"triangle",.060,master); playOsc(ctx,now+i*.075,f*2,f*2,.16,"sine",.025,master)}); return;}
+    playOsc(ctx,now,440,660,.08,"triangle",.040,master);
+  }
+
+  function stopBgm(){
+    state.bgmPlaying=false;
+    if(state.bgmTimer){clearInterval(state.bgmTimer); state.bgmTimer=null;}
+  }
+  function playBgmStep(){
+    if(!state.sound || !state.bgmPlaying || !state.running || state.ending) return;
+    const ctx=getAudio(); if(!ctx || ctx.state!=="running") return;
+    const now=ctx.currentTime+0.01;
+
+    const tense = state.strong || state.limitMode;
+
+    const normalChords=[
+      [220.00,261.63,329.63,392.00],
+      [196.00,246.94,293.66,392.00],
+      [174.61,220.00,261.63,349.23],
+      [196.00,246.94,311.13,369.99]
+    ];
+
+    // 強化/極限用：半音・低めの不穏音を混ぜた緊張感ある進行
+    const tenseChords=[
+      [196.00,233.08,293.66,349.23],
+      [185.00,220.00,277.18,329.63],
+      [174.61,207.65,261.63,311.13],
+      [164.81,196.00,246.94,293.66]
+    ];
+
+    const chords = tense ? tenseChords : normalChords;
+    const chord=chords[Math.floor(state.bgmStep/4)%chords.length];
+    const note=chord[state.bgmStep%chord.length];
+    const fifth=chord[(state.bgmStep+2)%chord.length];
+
+    const master=ctx.createGain();
+    master.gain.setValueAtTime(0.0001,now);
+    master.gain.exponentialRampToValueAtTime(tense ? 0.245 : 0.220,now+0.025);
+    master.gain.exponentialRampToValueAtTime(0.0001,now+0.42);
+    master.connect(ctx.destination);
+
+    if(tense){
+      // 緊張BGM：細かい高音＋不穏な伴奏
+      playOsc(ctx,now,note*2,note*2.012,.28,"triangle",0.115,master);
+      playOsc(ctx,now+.025,note*4,note*4.02,.13,"sine",0.055,master);
+      playOsc(ctx,now+.06,fifth,fifth*.985,.34,"sawtooth",0.070,master);
+      if(state.bgmStep%2===1) playOsc(ctx,now+.12,110,98,.30,"triangle",0.045,master);
+      if(state.bgmStep%8===7) playNoise(ctx,now+.04,.10,0.018,master);
+    }else{
+      playOsc(ctx,now,note*2,note*2.005,.34,"triangle",0.105,master);
+      playOsc(ctx,now+.035,note*4,note*4.01,.16,"sine",0.045,master);
+      if(state.bgmStep%2===0) playOsc(ctx,now,fifth,fifth*.998,.38,"sawtooth",0.055,master);
+      if(state.bgmStep%8===7) playOsc(ctx,now,146.83,130.81,.48,"triangle",0.060,master);
+    }
+
+    state.bgmStep++;
+  }
+  function startBgm(){
+    stopBgm();
+    if(!state.sound) return;
+    primeAudio();
+    state.bgmPlaying=true; state.bgmStep=0;
+    playBgmStep();
+    setTimeout(()=>{if(state.bgmPlaying && state.running && !state.ending) playBgmStep();},120);
+    state.bgmTimer=setInterval(playBgmStep,330);
+  }
+
+  document.querySelectorAll(".modeBtn").forEach(btn=>{
+    btn.addEventListener("click",()=>{primeAudio(); startGame(btn.dataset.mode);});
+  });
+  els.strongToggle.addEventListener("click",()=>{
+    if(!state.strongUnlocked) return;
+    state.strong=!state.strong;
+    if(state.strong) state.activeModeInfo = "strong";
+    else if(state.limitMode) state.activeModeInfo = "limit";
+    else state.activeModeInfo = null;
+    state.problemDeck=[]; updateMenu(); if(state.running && state.screen==="game" && !state.ending) startBgm(); toast(state.strong ? "強化モード ON" : "通常モード"); playTone("result");
+  });
+  els.soundToggle.addEventListener("click",()=>{
+    state.sound=!state.sound; state.soundToggleCount++;
+    if(state.sound){primeAudio(); if(state.running && state.screen==="game" && !state.ending) startBgm();}
+    else stopBgm();
+    if(state.soundToggleCount>=10 && !state.strongUnlocked){
+      state.strongUnlocked=true; localStorage.setItem(STORAGE_KEY,"true"); updateMenu(); toast("裏ワザ成功：強化モード解放！"); playTone("defeat"); return;
+    }
+    updateMenu();
+    if(state.soundToggleCount>=7 && !state.strongUnlocked) toast(`あと${10-state.soundToggleCount}回…`);
+  });
+  els.bestOpen.addEventListener("click", openBestModal);
+  els.bestClose.addEventListener("click", closeBestModal);
+  els.bestModal.addEventListener("click",(e)=>{ if(e.target === els.bestModal) closeBestModal(); });
+
+  els.limitToggle.addEventListener("click",()=>{
+    state.limitMode = !state.limitMode;
+    if(state.limitMode) state.activeModeInfo = "limit";
+    else if(state.strong) state.activeModeInfo = "strong";
+    else state.activeModeInfo = null;
+    updateMenu();
+    toast(state.limitMode ? "極限モード ON：体力1" : "極限モード OFF");
+    if(state.running && state.screen==="game" && !state.ending) startBgm();
+    playTone(state.limitMode ? "time10" : "result");
+  });
+  els.giveUp.addEventListener("click",()=>endGame(true));
+  els.retry.addEventListener("click",()=>startGame(state.lastMode));
+  els.backMenu.addEventListener("click",()=>{cancelActiveGameTimers(); showScreen("menu"); updateMenu();});
+
+  window.addEventListener("keydown",(e)=>{
+    if(state.screen!=="game") return;
+    const map={"0":"0","1":"1","2":"2","3":"3","4":"4","5":"5","6":"6","7":"7","8":"8","9":"9","+":"+","-":"-","x":"x","X":"x"};
+    if(e.key==="Backspace"){e.preventDefault(); return;}
+    if(e.key==="^"){handleKey("x²"); return;}
+    if(map[e.key]) handleKey(map[e.key]);
+  });
+
+  ["pointerdown","touchstart","mousedown","keydown"].forEach(evt=>{
+    window.addEventListener(evt,()=>{if(state.sound) primeAudio();},{passive:true});
+  });
+
+  function startHpLongPress(){
+    if(state.debugAnswerUnlocked){pressCorrectAnswerButton(); return;}
+    if(state.hpPressTimer) clearTimeout(state.hpPressTimer);
+    state.hpPressTimer=setTimeout(()=>{unlockDebugAnswerButton(); state.hpPressTimer=null;},3000);
+  }
+  function cancelHpLongPress(){
+    if(state.hpPressTimer){clearTimeout(state.hpPressTimer); state.hpPressTimer=null;}
+  }
+  els.heroHpBadge.addEventListener("pointerdown",(e)=>{e.preventDefault(); startHpLongPress();});
+  els.heroHpBadge.addEventListener("pointerup",cancelHpLongPress);
+  els.heroHpBadge.addEventListener("pointerleave",cancelHpLongPress);
+  els.heroHpBadge.addEventListener("pointercancel",cancelHpLongPress);
+  els.heroHpBadge.addEventListener("click",(e)=>{if(state.debugAnswerUnlocked){e.preventDefault(); pressCorrectAnswerButton();}});
+
+  renderKeypad();
+  updateMenu();
+})();
+</script>
+</body>
+</html>

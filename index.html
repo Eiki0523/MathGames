@@ -1,0 +1,85 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Math Game HW</title>
+  <link rel="stylesheet" href="./shared/common.css">
+  <style>
+    :root{
+      --sky:#87eaff;
+      --gold:#ffe989;
+      --purple:#b784ff;
+      --dark:#070713;
+    }
+    body{
+      background:
+        radial-gradient(circle at 18% 12%, rgba(116,231,255,.28), transparent 24%),
+        radial-gradient(circle at 82% 8%, rgba(255,233,137,.20), transparent 22%),
+        radial-gradient(circle at 78% 82%, rgba(183,132,255,.22), transparent 26%),
+        linear-gradient(160deg,#070713,#1b1234 62%,#05050b);
+    }
+    .homeCard{position:relative;overflow:hidden}
+    .homeCard::before{
+      content:"";position:absolute;inset:0;pointer-events:none;
+      background-image:
+        linear-gradient(rgba(255,255,255,.05) 1px,transparent 1px),
+        linear-gradient(90deg,rgba(255,255,255,.04) 1px,transparent 1px);
+      background-size:44px 44px;
+      mask-image:linear-gradient(to bottom,rgba(0,0,0,.7),transparent 88%);
+    }
+    .homeInner{position:relative;z-index:1}
+    .brand{
+      display:inline-flex;align-items:center;gap:8px;margin:0 auto 10px;padding:6px 12px;border-radius:999px;
+      background:rgba(255,255,255,.10);border:1px solid rgba(255,255,255,.18);color:#e8ddff;font-weight:900;
+    }
+    .brandWrap{text-align:center}
+    .title small{display:block;font-size:clamp(17px,4vw,26px);color:#d7c9f5;text-shadow:none;margin-bottom:5px}
+    .gameList{grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:22px}
+    .gameCard{min-height:170px;position:relative;overflow:hidden;display:flex;flex-direction:column;justify-content:space-between}
+    .gameCard::after{content:"";position:absolute;right:-26px;bottom:-34px;width:126px;height:126px;border-radius:50%;background:rgba(255,255,255,.10)}
+    .gameCard.tenkai{background:linear-gradient(135deg,rgba(48,73,140,.98),rgba(51,24,95,.96))}
+    .gameCard.revenger{background:linear-gradient(135deg,rgba(80,52,160,.98),rgba(18,11,48,.98))}
+    .gameTitle{font-size:clamp(24px,5vw,38px);line-height:1.12;margin-bottom:10px}
+    .gameDesc{font-size:clamp(13px,3vw,16px)}
+    .tagRow{display:flex;flex-wrap:wrap;gap:6px;margin-top:13px}
+    .tag{font-size:12px;font-weight:1000;border-radius:999px;padding:5px 8px;background:rgba(255,255,255,.13);border:1px solid rgba(255,255,255,.16);color:#f8f3ff}
+    .footerNote{text-align:center;margin-top:18px;color:var(--muted);font-size:13px;line-height:1.65;font-weight:800}
+    @media (max-width:720px){
+      .gameList{grid-template-columns:1fr}
+      .gameCard{min-height:142px}
+    }
+  </style>
+</head>
+<body>
+  <main class="app shell">
+    <section class="card homeCard">
+      <div class="homeInner">
+        <div class="brandWrap"><div class="brand">Math Game HW</div></div>
+        <h1 class="title"><small>ブラウザで遊べる数学ゲーム集</small>数学ゲーム<br>ホーム</h1>
+        <p class="lead">ゲームを選んでスタート。スマホ縦画面でも遊びやすい数学バトルです。</p>
+
+        <div class="gameList">
+          <a class="gameCard tenkai" href="./games/tenkai-lightning/">
+            <span>
+              <span class="gameTitle">展開<br>ライトニング</span>
+              <span class="gameDesc">因数の形を見て、展開後の式を順番に入力。悪魔を浄化する展開バトル。</span>
+            </span>
+            <span class="tagRow"><span class="tag">展開</span><span class="tag">60秒</span><span class="tag">自己ベスト</span></span>
+          </a>
+
+          <a class="gameCard revenger" href="./games/factorization-revenger/">
+            <span>
+              <span class="gameTitle">因数分解<br>リベンジャー</span>
+              <span class="gameDesc">展開された式を因数分解。闇魔法で神々しい天使を倒す逆方向バトル。</span>
+            </span>
+            <span class="tagRow"><span class="tag">因数分解</span><span class="tag">60秒</span><span class="tag">新作</span></span>
+          </a>
+        </div>
+
+        <p class="footerNote">Netlifyでは、このフォルダ全体をProduction deploysへドラッグ＆ドロップしてください。</p>
+      </div>
+    </section>
+  </main>
+</body>
+</html>
