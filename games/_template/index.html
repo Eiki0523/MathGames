@@ -1,0 +1,91 @@
+<!doctype html>
+<html lang="ja">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>テンプレートゲーム</title>
+  <link rel="stylesheet" href="../../shared/common.css">
+  <link rel="stylesheet" href="./style.css">
+</head>
+<body>
+  <main class="app">
+    <section id="menuScreen" class="screen active menuScreen">
+      <button id="bestOpen" class="cornerBtn">自己ベスト</button>
+      <h1 id="gameTitle" class="title">テンプレート<br>ゲーム</h1>
+      <p id="gameSubtitle" class="subtitle"></p>
+      <section id="menuCard" class="card">
+        <div id="modeGrid" class="modeGrid"></div>
+        <div class="menuActions">
+          <button id="strongToggle" class="pillBtn strong">強化モード：未解放</button>
+          <button id="soundToggle" class="pillBtn">音：ON</button>
+          <button id="limitToggle" class="pillBtn limit">極限モード：OFF</button>
+        </div>
+        <div id="unlockNote" class="unlockNote"></div>
+        <p id="gameInstructions" class="small"></p>
+      </section>
+    </section>
+
+    <section id="gameScreen" class="screen">
+      <section class="gameShell">
+        <div class="topBar">
+          <div class="timeWrap"><div id="timeFill" class="timeFill"></div><div id="timeLabel" class="timeLabel">60.0</div></div>
+          <div class="stat">撃破 <span id="killCount">0</span></div>
+          <div class="stat">得点 <span id="scoreNow">0</span></div>
+        </div>
+        <section id="battle" class="battle">
+          <div id="countdownOverlay" class="countdownOverlay" hidden>3</div>
+          <div class="problemPanel">
+            <div id="modeLabel" class="modeLabel"></div>
+            <div id="problem" class="problem"></div>
+            <div id="answerBox" class="answerBox">?</div>
+          </div>
+          <div id="heroHpBadge" class="heroHpBadge">自分の体力 <span id="heroHp">5</span></div>
+          <div class="stage" id="stage">
+            <div id="beam" class="beam"></div>
+            <div class="enemyWrap">
+              <div class="hp"><div id="hpFill" class="hpFill"></div></div>
+              <div id="enemy" class="enemy"></div>
+            </div>
+          </div>
+        </section>
+        <section id="inputMount" class="inputMount"></section>
+        <div class="menuActions"><button id="giveUp" class="pillBtn danger">終了して結果へ</button></div>
+      </section>
+    </section>
+
+    <section id="resultScreen" class="screen">
+      <section class="card">
+        <h2 id="resultTitle" class="resultTitle">リザルト</h2>
+        <div class="resultGrid">
+          <div class="resultItem"><span class="label">撃破数</span><span id="resultKills" class="value">0</span></div>
+          <div class="resultItem"><span class="label">総合スコア</span><span id="resultScore" class="value">0</span></div>
+          <div class="resultItem"><span class="label">ミス入力</span><span id="resultMiss" class="value">0</span></div>
+          <div class="resultItem"><span class="label">最大コンボ</span><span id="resultCombo" class="value">0</span></div>
+        </div>
+        <div id="bestResult" class="bestResult"></div>
+        <div id="breakdown" class="breakdown"></div>
+        <div class="menuActions">
+          <button id="retry" class="pillBtn primary">もう一度</button>
+          <button id="backMenu" class="pillBtn">モード選択へ</button>
+        </div>
+      </section>
+    </section>
+  </main>
+
+  <div id="bestModal" class="bestModal" hidden>
+    <div class="bestModalCard">
+      <div class="bestModalHeader">
+        <div>
+          <div class="bestModalTitle">自己ベスト</div>
+          <div id="bestUnlockStatus" class="bestUnlockStatus">強化モード：確認中</div>
+        </div>
+        <button id="bestClose" class="bestClose">×</button>
+      </div>
+      <div id="bestModalBody" class="bestModalBody"></div>
+    </div>
+  </div>
+
+  <div id="toast" class="toast"></div>
+  <script type="module" src="./game.js"></script>
+</body>
+</html>
