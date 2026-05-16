@@ -1,14 +1,20 @@
-# Math Game HW integrated v5
+# Math Game HW
 
-Netlifyにアップロードする統合版です。
+ブラウザで遊ぶ数学ゲーム集です。Netlify にそのまま配置できる静的サイト構成です。
 
-- `/index.html` : ゲーム一覧トップ
-- `/games/tenkai-lightning/` : 展開ライトニング
-- `/games/factorization-revenger/` : 因数分解リベンジャー
-- `/shared/` : 因数分解リベンジャーなどで使う共通JS/CSS
+## フォルダ構成
 
-v5変更:
-- 天界ラッシュを basic / square / diff の3種類均等出現に変更
-- 入力ボタンの `²` を常時表示に変更
+- `/index.html`
+  - ゲーム一覧トップ
+- `/games/tenkai-lightning/`
+  - 展開ライトニング
+- `/games/factorization-revenger/`
+  - 因数分解リベンジャー
+- `/games/_template/`
+  - 新しいゲームを追加するときの雛形
+- `/shared/`
+  - 複数ゲームで共通利用する JS / CSS
 
-Netlifyの Production deploys のドラッグ枠に、このフォルダ全体を入れてください。
+## デプロイ
+
+Netlify の Production deploys に、このフォルダ全体をアップロードしてください。
