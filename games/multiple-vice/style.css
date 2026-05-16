@@ -98,6 +98,11 @@ body{
   font-weight:1000;color:#fff4d2;text-shadow:0 2px 4px rgba(0,0,0,.45);font-size:13px;
 }
 .heroHpBadge span{display:inline-block;min-width:1.2em;color:var(--vice-accent-2);font-size:1.2em}
+.heroHpBadge.debugReady{
+  background:linear-gradient(180deg,rgba(126,217,255,.42),rgba(18,34,73,.72));
+  border-color:rgba(126,217,255,.72);
+  box-shadow:0 0 20px rgba(126,217,255,.4),0 8px 18px rgba(0,0,0,.28);
+}
 .stage{position:relative;z-index:1;height:190px;background:radial-gradient(ellipse at 50% 88%,rgba(255,255,255,.08),transparent 38%)}
 .enemyWrap{position:absolute;left:50%;transform:translateX(-50%);bottom:-6px;width:220px;height:180px;display:grid;place-items:center}
 .enemy{width:160px;height:160px;position:relative;z-index:2;transform-origin:center bottom;animation:float 2.7s ease-in-out infinite}

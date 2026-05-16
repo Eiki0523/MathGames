@@ -79,7 +79,7 @@ export function renderEnemySvg(problem, mood = "normal"){
         <path d="M23 26 C10 42 10 72 22 88" fill="none" stroke="${stroke}" stroke-width="4" stroke-linecap="round"/>
         <path d="M101 26 C114 42 114 72 102 88" fill="none" stroke="${stroke}" stroke-width="4" stroke-linecap="round"/>
         <circle cx="62" cy="58" r="54" fill="none" stroke="${aura}" stroke-width="4" opacity=".5"/>
-        <text x="62" y="54" text-anchor="middle" font-size="34" font-weight="1000" fill="${isEvil ? "#fff6bf" : "#15335e"}">${problem.number}</text>
+        <text x="62" y="42" text-anchor="middle" font-size="31" font-weight="1000" fill="${isEvil ? "#fff6bf" : "#15335e"}">${problem.number}</text>
         ${eyePath}
         ${mouth}
       </g>

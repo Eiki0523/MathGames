@@ -37,6 +37,7 @@ const els = {
   modeLabel: document.getElementById("modeLabel"),
   problem: document.getElementById("problem"),
   speechBubble: document.getElementById("speechBubble"),
+  heroHpBadge: document.getElementById("heroHpBadge"),
   heroHp: document.getElementById("heroHp"),
   battle: document.getElementById("battle"),
   stage: document.getElementById("stage"),
@@ -70,11 +71,13 @@ const state = {
   ending: false,
   warned30: false,
   warned10: false,
-  heroHp: 5,
+  heroHp: 3,
   current: null,
   source: null,
   countdownController: null,
-  lockInput: false
+  lockInput: false,
+  debugAnswerUnlocked: false,
+  hpPressTimer: null
 };
 
 function createClock(durationMs){
@@ -209,6 +212,38 @@ function updateScoreView(){
   els.scoreNow.textContent = String(state.score.score);
 }
 
+function pressCorrectAnswerButton(){
+  if(!state.running || state.ending || !state.current) return;
+  handleChoice(state.current.truth ? "◯" : "✕");
+}
+
+function unlockDebugAnswerButton(){
+  state.debugAnswerUnlocked = true;
+  els.heroHpBadge.classList.add("debugReady");
+  toast("デバッグ：答えボタンON");
+  AudioManager.playSE("start");
+}
+
+function startHpLongPress(event){
+  event?.preventDefault?.();
+  if(state.debugAnswerUnlocked){
+    pressCorrectAnswerButton();
+    return;
+  }
+  if(state.hpPressTimer) clearTimeout(state.hpPressTimer);
+  state.hpPressTimer = setTimeout(() => {
+    unlockDebugAnswerButton();
+    state.hpPressTimer = null;
+  }, 3000);
+}
+
+function cancelHpLongPress(){
+  if(state.hpPressTimer){
+    clearTimeout(state.hpPressTimer);
+    state.hpPressTimer = null;
+  }
+}
+
 function nextAfterDelay(delayMs = 900){
   setTimeout(() => {
     if(state.running && !state.ending){
@@ -230,7 +265,7 @@ function handleCorrect(){
   void els.enemy.offsetWidth;
   els.enemy.classList.add("thanks");
   AudioManager.playSE("correct");
-  nextAfterDelay(760);
+  nextAfterDelay(380);
 }
 
 function handleFalseNegative(){
@@ -291,17 +326,23 @@ function stopCountdown(){
 
 function resetStatus(){
   state.score = createScoreState();
-  state.heroHp = state.limitMode ? 1 : 5;
+  state.heroHp = state.limitMode ? 1 : 3;
   state.warned30 = false;
   state.warned10 = false;
   state.current = null;
   state.ending = false;
   state.running = false;
   state.lockInput = false;
+  state.debugAnswerUnlocked = false;
+  if(state.hpPressTimer){
+    clearTimeout(state.hpPressTimer);
+    state.hpPressTimer = null;
+  }
   state.source = createProblemSource({ modeId: state.modeId, strong: state.strong });
   els.killCount.textContent = "0";
   els.scoreNow.textContent = "0";
   els.heroHp.textContent = String(state.heroHp);
+  els.heroHpBadge.classList.remove("debugReady");
   els.timeLabel.textContent = (getModeDurationMs() / 1000).toFixed(1);
   els.timeFill.style.width = "100%";
 }
@@ -544,6 +585,15 @@ function wireEvents(){
   els.giveUp.addEventListener("click", () => endGame(true, false));
   els.retry.addEventListener("click", () => startGame(state.lastModeId));
   els.backMenu.addEventListener("click", goMenu);
+  els.heroHpBadge.addEventListener("pointerdown", startHpLongPress);
+  els.heroHpBadge.addEventListener("pointerup", cancelHpLongPress);
+  els.heroHpBadge.addEventListener("pointerleave", cancelHpLongPress);
+  els.heroHpBadge.addEventListener("pointercancel", cancelHpLongPress);
+  els.heroHpBadge.addEventListener("click", event => {
+    if(state.debugAnswerUnlocked){
+      event.preventDefault();
+    }
+  });
   window.addEventListener("keydown", handleKeydown);
 }
 
