@@ -211,6 +211,9 @@ function damageEffect(){
 }
 
 function enemyAttackEffect(){
+  els.gameScreen.classList.remove("shakeScreen");
+  void els.gameScreen.offsetWidth;
+  els.gameScreen.classList.add("shakeScreen");
   els.battle.classList.remove("damaged");
   void els.battle.offsetWidth;
   els.battle.classList.add("damaged");

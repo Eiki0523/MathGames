@@ -19,6 +19,15 @@ body{
 
 .screen{display:none;width:min(980px,100%)}
 .screen.active{display:block}
+.screen.shakeScreen{animation:screenShake .30s ease both}
+@keyframes screenShake{
+  0%{transform:translateX(0)}
+  20%{transform:translateX(-8px)}
+  40%{transform:translateX(8px)}
+  60%{transform:translateX(-6px)}
+  80%{transform:translateX(6px)}
+  100%{transform:translateX(0)}
+}
 .menuScreen{position:relative}
 .subtitle{text-align:center;color:var(--muted);font-weight:850;line-height:1.7;margin:0 auto 16px;max-width:780px}
 .modeGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:10px}
