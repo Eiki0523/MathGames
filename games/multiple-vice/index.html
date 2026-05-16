@@ -10,6 +10,7 @@
 <body>
   <main class="app">
     <section id="menuScreen" class="screen active menuScreen">
+      <button id="guideOpen" class="cornerBtn cornerBtnLeft">操作説明</button>
       <button id="bestOpen" class="cornerBtn">自己ベスト</button>
       <h1 id="gameTitle" class="title">倍数<br>ヴァイス</h1>
       <p id="gameSubtitle" class="subtitle"></p>
@@ -83,6 +84,37 @@
         <button id="bestClose" class="bestClose">×</button>
       </div>
       <div id="bestModalBody" class="bestModalBody"></div>
+    </div>
+  </div>
+
+  <div id="guideModal" class="bestModal" hidden>
+    <div class="bestModalCard">
+      <div class="bestModalHeader">
+        <div>
+          <div class="bestModalTitle">操作説明</div>
+          <div class="bestUnlockStatus">◯なら本当、✕ならウソです。</div>
+        </div>
+        <button id="guideClose" class="bestClose">×</button>
+      </div>
+      <div class="bestModalBody">
+        <div class="bestSection">
+          <div class="bestSectionTitle">遊び方</div>
+          <div class="breakdown">数字と吹き出しを見て、本当にその倍数なら◯、違うなら✕を押します。<br>ランダムモードでは 2・3・5・6・9 が混ざって出ます。</div>
+        </div>
+        <div class="bestSection">
+          <div class="bestSectionTitle">倍数の見分け方</div>
+          <div class="guideList">
+            <div class="guideRow"><strong>2</strong> 偶数ならOK。末尾が 0,2,4,6,8。</div>
+            <div class="guideRow"><strong>3</strong> 各けたの和が 3 の倍数。</div>
+            <div class="guideRow"><strong>4</strong> 下2けたが 4 の倍数。</div>
+            <div class="guideRow"><strong>5</strong> 末尾が 0 か 5。</div>
+            <div class="guideRow"><strong>6</strong> 2 と 3 の両方の倍数。</div>
+            <div class="guideRow"><strong>8</strong> 下3けたが 8 の倍数。</div>
+            <div class="guideRow"><strong>9</strong> 各けたの和が 9 の倍数。</div>
+            <div class="guideRow"><strong>11</strong> 奇数けた和と偶数けた和の差が 11 の倍数。</div>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 

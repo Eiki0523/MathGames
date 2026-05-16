@@ -16,7 +16,10 @@ const els = {
   gameScreen: document.getElementById("gameScreen"),
   resultScreen: document.getElementById("resultScreen"),
   menuCard: document.getElementById("menuCard"),
+  guideOpen: document.getElementById("guideOpen"),
   bestOpen: document.getElementById("bestOpen"),
+  guideModal: document.getElementById("guideModal"),
+  guideClose: document.getElementById("guideClose"),
   bestModal: document.getElementById("bestModal"),
   bestClose: document.getElementById("bestClose"),
   bestModalBody: document.getElementById("bestModalBody"),
@@ -415,6 +418,14 @@ function closeBestModal(){
   els.bestModal.hidden = true;
 }
 
+function openGuideModal(){
+  els.guideModal.hidden = false;
+}
+
+function closeGuideModal(){
+  els.guideModal.hidden = true;
+}
+
 function updateMenu(){
   els.menuCard.classList.toggle("strongOn", state.strong);
   els.menuCard.classList.toggle("limitOn", state.limitMode);
@@ -578,9 +589,14 @@ function wireEvents(){
   });
 
   els.bestOpen.addEventListener("click", openBestModal);
+  els.guideOpen.addEventListener("click", openGuideModal);
   els.bestClose.addEventListener("click", closeBestModal);
+  els.guideClose.addEventListener("click", closeGuideModal);
   els.bestModal.addEventListener("click", event => {
     if(event.target === els.bestModal) closeBestModal();
+  });
+  els.guideModal.addEventListener("click", event => {
+    if(event.target === els.guideModal) closeGuideModal();
   });
   els.giveUp.addEventListener("click", () => endGame(true, false));
   els.retry.addEventListener("click", () => startGame(state.lastModeId));
