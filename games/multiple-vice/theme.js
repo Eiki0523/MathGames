@@ -32,6 +32,33 @@ export function applyThemeVars(root = document.documentElement){
   });
 }
 
+function getPalette(divisor, isEvil){
+  const normalPalette = {
+    2: { fill1: "#f6fbff", fill2: "#8fd7ff", stroke: "#daf2ff", aura: "#fff1a5", text: "#15335e" },
+    3: { fill1: "#f7fff5", fill2: "#8fe7b3", stroke: "#d9f8e3", aura: "#fff1a5", text: "#16462c" },
+    5: { fill1: "#fff8f1", fill2: "#ffc27a", stroke: "#ffe1bd", aura: "#fff1a5", text: "#6a3a11" },
+    6: { fill1: "#fff8f8", fill2: "#ff9fa8", stroke: "#ffd7db", aura: "#ffe4a8", text: "#692436" },
+    7: { fill1: "#faf7ff", fill2: "#c4a0ff", stroke: "#eadcff", aura: "#ffe6ff", text: "#4f2675" },
+    8: { fill1: "#f3fffd", fill2: "#8fe5d7", stroke: "#d6fbf3", aura: "#eaffe8", text: "#185247" },
+    9: { fill1: "#fff9ef", fill2: "#f2d37c", stroke: "#ffefc5", aura: "#fff2b4", text: "#6a5614" },
+    11: { fill1: "#f5f7ff", fill2: "#9aa8ff", stroke: "#dde3ff", aura: "#ece7ff", text: "#263778" },
+    25: { fill1: "#fff7fb", fill2: "#ff9bc4", stroke: "#ffd7e9", aura: "#ffe0f0", text: "#7a224b" }
+  };
+  const evilPalette = {
+    2: { fill1: "#866dff", fill2: "#4a37b3", stroke: "#1a0625", aura: "#ff7ab4", text: "#fff6bf" },
+    3: { fill1: "#4b9d74", fill2: "#29593f", stroke: "#102519", aura: "#d9ff7a", text: "#f4ffe7" },
+    5: { fill1: "#d5873f", fill2: "#7d4218", stroke: "#341a08", aura: "#ffcb7a", text: "#fff3d6" },
+    6: { fill1: "#d9617d", fill2: "#7f2033", stroke: "#2f0911", aura: "#ff9eb8", text: "#fff0f2" },
+    7: { fill1: "#9b67df", fill2: "#532684", stroke: "#220a38", aura: "#d69cff", text: "#f8efff" },
+    8: { fill1: "#4db4aa", fill2: "#1f615f", stroke: "#0a2d2d", aura: "#8cffea", text: "#eafffb" },
+    9: { fill1: "#c3a04a", fill2: "#665015", stroke: "#2d2308", aura: "#ffe17a", text: "#fff7d8" },
+    11: { fill1: "#6f7cff", fill2: "#2f3b8e", stroke: "#14183d", aura: "#a2abff", text: "#f4f6ff" },
+    25: { fill1: "#db71a6", fill2: "#7d2b53", stroke: "#330d21", aura: "#ff9cc8", text: "#fff1f8" }
+  };
+  const source = isEvil ? evilPalette : normalPalette;
+  return source[divisor] || source[2];
+}
+
 function getFace(mood){
   if(mood === "thanks"){
     return {
@@ -60,10 +87,8 @@ function getFace(mood){
 export function renderEnemySvg(problem, mood = "normal"){
   const isEvil = mood === "evil";
   const { eyePath, mouth } = getFace(mood);
-  const fill1 = isEvil ? "#8366ff" : "#f7fbff";
-  const fill2 = isEvil ? "#4830a3" : "#92d7ff";
-  const stroke = isEvil ? "#1a0625" : "#daf2ff";
-  const aura = isEvil ? "#ff7ab4" : "#fff1a5";
+  const palette = getPalette(problem.claimDivisor, isEvil);
+  const { fill1, fill2, stroke, aura, text } = palette;
   return `
     <svg class="enemySvg" viewBox="0 0 160 160" aria-hidden="true">
       <defs>
@@ -79,7 +104,7 @@ export function renderEnemySvg(problem, mood = "normal"){
         <path d="M23 26 C10 42 10 72 22 88" fill="none" stroke="${stroke}" stroke-width="4" stroke-linecap="round"/>
         <path d="M101 26 C114 42 114 72 102 88" fill="none" stroke="${stroke}" stroke-width="4" stroke-linecap="round"/>
         <circle cx="62" cy="58" r="54" fill="none" stroke="${aura}" stroke-width="4" opacity=".5"/>
-        <text x="62" y="42" text-anchor="middle" font-size="31" font-weight="1000" fill="${isEvil ? "#fff6bf" : "#15335e"}">${problem.number}</text>
+        <text x="62" y="42" text-anchor="middle" font-size="31" font-weight="1000" fill="${text}">${problem.number}</text>
         ${eyePath}
         ${mouth}
       </g>

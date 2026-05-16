@@ -10,6 +10,15 @@ import { mountButtonInput } from "./input/button-input.js";
 
 const bestStore = createBestStore(gameConfig.gameId);
 const bgmController = createBgmController();
+const thanksLines = ["ハッピー♪", "やったー！"];
+const hurtLines = ["信じてもらえないんだ…", "そんな…門番さん…"];
+const evilLines = [
+  "ザルで助かるなぁ！",
+  "はっ！門番失格だな！！",
+  "やめたらこの仕事",
+  "天国荒らすぞ～！",
+  "ラッキー！偽物なのに通れたぜ"
+];
 
 const els = {
   menuScreen: document.getElementById("menuScreen"),
@@ -233,6 +242,10 @@ function updateScoreView(){
   els.scoreNow.textContent = String(state.score.score);
 }
 
+function pickRandom(items){
+  return items[Math.floor(Math.random() * items.length)];
+}
+
 function pressCorrectAnswerButton(){
   if(!state.running || state.ending || !state.current) return;
   handleChoice(state.current.truth ? "◯" : "✕");
@@ -280,7 +293,7 @@ function handleCorrect(){
   addAttackPoint();
   addDefeatPoint();
   updateScoreView();
-  els.speechBubble.textContent = "ありがとう！";
+  els.speechBubble.textContent = pickRandom(thanksLines);
   setEnemyVisual("thanks");
   els.enemy.classList.remove("thanks");
   void els.enemy.offsetWidth;
@@ -293,7 +306,7 @@ function handleFalseNegative(){
   state.score.miss++;
   state.score.combo = 0;
   updateScoreView();
-  els.speechBubble.textContent = "本物なのに…ひどすぎる";
+  els.speechBubble.textContent = pickRandom(hurtLines);
   els.speechBubble.classList.remove("shake");
   void els.speechBubble.offsetWidth;
   els.speechBubble.classList.add("shake");
@@ -309,7 +322,7 @@ function handleFalsePositive(){
   state.score.miss++;
   state.score.combo = 0;
   updateScoreView();
-  els.speechBubble.textContent = "ふはは、騙されたなぁ！";
+  els.speechBubble.textContent = pickRandom(evilLines);
   els.speechBubble.classList.remove("shake");
   void els.speechBubble.offsetWidth;
   els.speechBubble.classList.add("shake");

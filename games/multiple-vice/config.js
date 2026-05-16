@@ -110,7 +110,7 @@ export const gameConfig = {
       id: "random",
       name: "ランダム",
       menuTitle: "天門ヴァイス",
-      description: "その時に使える全ての倍数の魂が混ざって出現。12体以上で強化解放。",
+      description: "その時に使える全ての倍数の魂が混ざって出現。",
       durationMs: 30000,
       bgm: { type: "generated", mode: "tense" },
       strongOnly: false
