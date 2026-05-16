@@ -78,6 +78,12 @@ function getFace(mood){
       mouth: `<path d="M40 82 Q60 66 80 82" fill="none" stroke="#2d001b" stroke-width="7" stroke-linecap="round"/><path d="M44 82 L50 89 L56 82 L62 89 L68 82 L74 89" fill="none" stroke="#fff0df" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"/>`
     };
   }
+  if(mood === "busted"){
+    return {
+      eyePath: `<path d="M39 52 L52 63" stroke="#240415" stroke-width="6" stroke-linecap="round"/><path d="M52 52 L39 63" stroke="#240415" stroke-width="6" stroke-linecap="round"/><path d="M68 52 L81 63" stroke="#240415" stroke-width="6" stroke-linecap="round"/><path d="M81 52 L68 63" stroke="#240415" stroke-width="6" stroke-linecap="round"/>`,
+      mouth: `<path d="M42 84 Q60 74 78 84" fill="none" stroke="#2d001b" stroke-width="7" stroke-linecap="round"/><path d="M50 91 Q60 98 70 91" fill="none" stroke="#ffd7e9" stroke-width="3" stroke-linecap="round"/>`
+    };
+  }
   return {
     eyePath: `<ellipse cx="46" cy="58" rx="8" ry="10" fill="#14325b"/><ellipse cx="74" cy="58" rx="8" ry="10" fill="#14325b"/><circle cx="43" cy="55" r="2" fill="#ffffff"/><circle cx="71" cy="55" r="2" fill="#ffffff"/>`,
     mouth: `<path d="M44 84 Q60 92 76 84" fill="none" stroke="#35506d" stroke-width="5" stroke-linecap="round"/>`
@@ -85,7 +91,7 @@ function getFace(mood){
 }
 
 export function renderEnemySvg(problem, mood = "normal"){
-  const isEvil = mood === "evil";
+  const isEvil = mood === "evil" || mood === "busted";
   const { eyePath, mouth } = getFace(mood);
   const palette = getPalette(problem.claimDivisor, isEvil);
   const { fill1, fill2, stroke, aura, text } = palette;

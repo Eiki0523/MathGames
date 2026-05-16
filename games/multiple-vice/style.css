@@ -137,6 +137,15 @@ body{
   72%{transform:translateX(7px) scale(.97)}
   100%{opacity:0;transform:translateY(24px) scale(.84)}
 }
+.enemy.busted{animation:bustedFade .84s ease both;filter:brightness(1.1) drop-shadow(0 0 20px rgba(255,122,180,.45))}
+@keyframes bustedFade{
+  0%{opacity:1;transform:translateX(0) scale(1)}
+  16%{transform:translateX(-10px) rotate(-4deg) scale(1.02)}
+  34%{transform:translateX(10px) rotate(4deg) scale(.99)}
+  52%{transform:translateX(-8px) rotate(-3deg) scale(.97)}
+  70%{transform:translateX(8px) rotate(3deg) scale(.94)}
+  100%{opacity:0;transform:translateY(22px) scale(.78)}
+}
 .enemy.evilRush{animation:evilRush .72s cubic-bezier(.18,.92,.2,1.02) both}
 @keyframes evilRush{
   0%{opacity:1;transform:translateY(4px) scale(1.18)}

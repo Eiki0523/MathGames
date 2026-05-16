@@ -12,6 +12,12 @@ const bestStore = createBestStore(gameConfig.gameId);
 const bgmController = createBgmController();
 const thanksLines = ["ハッピー♪", "やったー！"];
 const hurtLines = ["信じてもらえないんだ…", "そんな…門番さん…"];
+const bustedLines = [
+  "なぜバレた～",
+  "ちくしょー",
+  "この門番やるな…",
+  "くそ！退散だー！"
+];
 const evilLines = [
   "ザルで助かるなぁ！",
   "はっ！門番失格だな！！",
@@ -287,6 +293,10 @@ function nextAfterDelay(delayMs = 900){
 }
 
 function handleCorrect(){
+  if(!state.current.truth){
+    handleExposeFake();
+    return;
+  }
   state.score.kills++;
   state.score.combo++;
   state.score.maxCombo = Math.max(state.score.maxCombo, state.score.combo);
@@ -300,6 +310,25 @@ function handleCorrect(){
   els.enemy.classList.add("thanks");
   AudioManager.playSE("correct");
   nextAfterDelay(380);
+}
+
+function handleExposeFake(){
+  state.score.kills++;
+  state.score.combo++;
+  state.score.maxCombo = Math.max(state.score.maxCombo, state.score.combo);
+  addAttackPoint();
+  addDefeatPoint();
+  updateScoreView();
+  els.speechBubble.textContent = pickRandom(bustedLines);
+  els.speechBubble.classList.remove("shake");
+  void els.speechBubble.offsetWidth;
+  els.speechBubble.classList.add("shake");
+  setEnemyVisual("busted");
+  els.enemy.classList.remove("busted");
+  void els.enemy.offsetWidth;
+  els.enemy.classList.add("busted");
+  AudioManager.playSE("correct");
+  nextAfterDelay(760);
 }
 
 function handleFalseNegative(){
