@@ -67,6 +67,7 @@ const state = {
   strong: false,
   limitMode: false,
   sound: true,
+  soundToggleCount: 0,
   running: false,
   ending: false,
   warned30: false,
@@ -75,7 +76,9 @@ const state = {
   current: null,
   input: [],
   source: null,
-  countdownController: null
+  countdownController: null,
+  debugAnswerUnlocked: false,
+  hpPressTimer: null
 };
 
 function createClock(durationMs){
@@ -212,6 +215,45 @@ function takeDamage(){
   }
 }
 
+function pressCorrectAnswerButton(){
+  if(!state.running || state.ending || !state.current) return;
+  const target = state.current.answerCandidates[0] || [];
+  const remainder = target.slice(state.input.length);
+  if(remainder.length === 0){
+    handleKey("OK");
+    return;
+  }
+  remainder.forEach(token => handleKey(token));
+  handleKey("OK");
+}
+
+function unlockDebugAnswerButton(){
+  state.debugAnswerUnlocked = true;
+  els.heroHpBadge.classList.add("debugReady");
+  toast("デバッグ：答えボタンON");
+  AudioManager.playSE("start");
+}
+
+function startHpLongPress(event){
+  event?.preventDefault?.();
+  if(state.debugAnswerUnlocked){
+    pressCorrectAnswerButton();
+    return;
+  }
+  if(state.hpPressTimer) clearTimeout(state.hpPressTimer);
+  state.hpPressTimer = setTimeout(() => {
+    unlockDebugAnswerButton();
+    state.hpPressTimer = null;
+  }, 3000);
+}
+
+function cancelHpLongPress(){
+  if(state.hpPressTimer){
+    clearTimeout(state.hpPressTimer);
+    state.hpPressTimer = null;
+  }
+}
+
 function addAttackPoint(){
   const point = state.strong ? gameConfig.score.strongAttackPoint : gameConfig.score.attackPoint;
   state.score.attackScore += point;
@@ -313,10 +355,16 @@ function resetStatus(){
   state.current = null;
   state.ending = false;
   state.running = false;
+  state.debugAnswerUnlocked = false;
+  if(state.hpPressTimer){
+    clearTimeout(state.hpPressTimer);
+    state.hpPressTimer = null;
+  }
   state.source = createProblemSource({ modeId: state.modeId, strong: state.strong });
   els.killCount.textContent = "0";
   els.scoreNow.textContent = "0";
   els.heroHp.textContent = String(state.heroHp);
+  els.heroHpBadge.classList.remove("debugReady");
   els.timeLabel.textContent = (getModeDurationMs() / 1000).toFixed(1);
   els.timeFill.style.width = "100%";
   els.timeLabel.classList.remove("timeWarn", "timeDanger");
@@ -543,13 +591,25 @@ function wireEvents(){
 
   els.soundToggle.addEventListener("click", () => {
     state.sound = !state.sound;
+    state.soundToggleCount++;
     AudioManager.setEnabled(state.sound);
+    if(state.soundToggleCount >= 10 && !state.strongUnlocked){
+      state.strongUnlocked = true;
+      Storage.saveFlag(gameConfig.unlock.storageKey, true);
+      updateMenu();
+      toast("裏ワザ成功：強化モード解放！");
+      AudioManager.playSE("defeat");
+      return;
+    }
     if(!state.sound){
       bgmController.stop();
     }else if(state.running){
       bgmController.start(getCurrentMode().bgm);
     }
     updateMenu();
+    if(state.soundToggleCount >= 7 && !state.strongUnlocked){
+      toast(`あと${10 - state.soundToggleCount}回…`);
+    }
   });
 
   els.bestOpen.addEventListener("click", openBestModal);
@@ -560,6 +620,15 @@ function wireEvents(){
   els.giveUp.addEventListener("click", () => endGame(true, false));
   els.retry.addEventListener("click", () => startGame(state.lastModeId));
   els.backMenu.addEventListener("click", goMenu);
+  els.heroHpBadge.addEventListener("pointerdown", startHpLongPress);
+  els.heroHpBadge.addEventListener("pointerup", cancelHpLongPress);
+  els.heroHpBadge.addEventListener("pointerleave", cancelHpLongPress);
+  els.heroHpBadge.addEventListener("pointercancel", cancelHpLongPress);
+  els.heroHpBadge.addEventListener("click", event => {
+    if(state.debugAnswerUnlocked){
+      event.preventDefault();
+    }
+  });
   window.addEventListener("keydown", handleKeydown);
 }
 

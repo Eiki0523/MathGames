@@ -463,7 +463,7 @@ function endGame(manual, timeUp = false){
     showResult(true, false);
     return;
   }
-  setTimeout(() => showResult(false, timeUp), 600);
+  setTimeout(() => showResult(false, timeUp), timeUp ? 2000 : 600);
 }
 
 function showResult(manual, timeUp){
@@ -505,7 +505,7 @@ function showResult(manual, timeUp){
     `見抜き成功点：${state.score.defeatedScore} 点`,
     `連続正解ボーナス：${state.score.comboScore} 点`,
     `極限モードボーナス：${state.score.extremeBonus} 点`,
-    `残り見逃しボーナス：${state.score.healthBonus} 点`,
+    `残り仏の顔ボーナス：${state.score.healthBonus} 点`,
     unlockedNow ? "<strong>強化モード解放！</strong>" : "",
     manual ? "途中終了しました。" : (timeUp ? "時間切れです。" : "審判終了。")
   ].filter(Boolean).join("<br>");
