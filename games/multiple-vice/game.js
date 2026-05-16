@@ -126,6 +126,9 @@ function showScreen(name){
   [els.menuScreen, els.gameScreen, els.resultScreen].forEach(el => el.classList.remove("active"));
   els[`${name}Screen`].classList.add("active");
   state.screen = name;
+  if(name !== "game"){
+    els.gameScreen.classList.remove("shakeScreen");
+  }
   els.gameScreen.classList.toggle("limitScreen", name === "game" && state.limitMode);
 }
 
@@ -409,6 +412,7 @@ function resetStatus(){
   els.scoreNow.textContent = "0";
   els.heroHp.textContent = String(state.heroHp);
   els.heroHpBadge.classList.remove("debugReady");
+  els.gameScreen.classList.remove("shakeScreen");
   els.timeLabel.textContent = (getModeDurationMs() / 1000).toFixed(1);
   els.timeFill.style.width = "100%";
 }

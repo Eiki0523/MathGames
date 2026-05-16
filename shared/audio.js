@@ -116,8 +116,8 @@ export const AudioManager = (() => {
       return;
     }
     if(type === "count"){
-      playOsc(c,now,523.25,659.25,0.12,"triangle",0.040,master);
-      playOsc(c,now,1046.5,1318.5,0.10,"sine",0.018,master);
+      playOsc(c,now,523.25,659.25,0.12,"triangle",0.060,master);
+      playOsc(c,now,1046.5,1318.5,0.10,"sine",0.032,master);
       return;
     }
     if(type === "start"){
