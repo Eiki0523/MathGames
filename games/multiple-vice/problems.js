@@ -49,7 +49,7 @@ function buildSingleModeDeck(divisor, strong){
 
   for(let number = min; number <= max; number++){
     if(isMultiple(number, divisor)) trueNumbers.push(number);
-    else falseNumbers.push(number);
+    else if(divisor !== 25 || number % 10 === 0 || number % 10 === 5) falseNumbers.push(number);
   }
 
   const pairCount = Math.min(trueNumbers.length, falseNumbers.length);
