@@ -111,6 +111,7 @@ function showScreen(name){
   [els.menuScreen, els.gameScreen, els.resultScreen].forEach(el => el.classList.remove("active"));
   els[`${name}Screen`].classList.add("active");
   state.screen = name;
+  els.gameScreen.classList.toggle("limitScreen", name === "game" && state.limitMode);
 }
 
 function getCurrentMode(){
@@ -121,9 +122,26 @@ function getModeDurationMs(){
   return getCurrentMode()?.durationMs || gameConfig.defaultDurationMs;
 }
 
+function getAvailableModes(strong = state.strong){
+  if(strong){
+    const strongIds = new Set(["m11", "m3", "m25", "m6", "m9", "random"]);
+    return gameConfig.modes.filter(mode => strongIds.has(mode.id));
+  }
+  const normalIds = new Set(["m2", "m3", "m5", "m6", "m7", "m8", "m9", "random"]);
+  return gameConfig.modes.filter(mode => normalIds.has(mode.id));
+}
+
+function ensureValidModeSelection(){
+  const availableModes = getAvailableModes();
+  if(availableModes.some(mode => mode.id === state.modeId)) return;
+  state.modeId = availableModes[0].id;
+  state.lastModeId = state.modeId;
+}
+
 function renderModeButtons(){
+  ensureValidModeSelection();
   els.modeGrid.innerHTML = "";
-  gameConfig.modes.forEach(mode => {
+  getAvailableModes().forEach(mode => {
     const btn = document.createElement("button");
     btn.className = "modeBtn";
     btn.dataset.mode = mode.id;
@@ -396,7 +414,7 @@ function recordText(record){
 
 function renderBestModal(){
   const section = (strong) => {
-    const rows = gameConfig.modes.map(mode => {
+    const rows = getAvailableModes(strong).map(mode => {
       const rec = bestStore.get(mode.id, strong);
       return `
         <div class="bestRow"><strong>${mode.name}</strong><br>
@@ -427,8 +445,11 @@ function closeGuideModal(){
 }
 
 function updateMenu(){
+  ensureValidModeSelection();
   els.menuCard.classList.toggle("strongOn", state.strong);
   els.menuCard.classList.toggle("limitOn", state.limitMode);
+  els.gameScreen.classList.toggle("limitScreen", state.screen === "game" && state.limitMode);
+  renderModeButtons();
 
   if(state.strongUnlocked){
     els.strongToggle.disabled = false;

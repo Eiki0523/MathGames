@@ -47,6 +47,10 @@ body{
 .unlockNote{color:var(--muted);font-weight:800;text-align:center;margin-top:10px;min-height:1.4em}
 .strongOn .modeBtn{background:linear-gradient(135deg,rgba(92,142,196,.96),rgba(26,53,97,.98))}
 .limitOn .modeBtn{box-shadow:0 8px 0 rgba(0,0,0,.25),0 0 24px rgba(255,85,119,.22);border-color:rgba(255,85,119,.35)}
+.limitScreen .battle{
+  box-shadow:0 0 0 2px rgba(255,95,116,.45),0 0 28px rgba(255,95,116,.18);
+  border-color:rgba(255,95,116,.42);
+}
 
 .gameShell{display:grid;gap:10px}
 .battle{
@@ -99,6 +103,12 @@ body{
   font-weight:1000;color:#fff4d2;text-shadow:0 2px 4px rgba(0,0,0,.45);font-size:13px;
 }
 .heroHpBadge span{display:inline-block;min-width:1.2em;color:var(--vice-accent-2);font-size:1.2em}
+.limitScreen .heroHpBadge{
+  background:linear-gradient(180deg,rgba(255,95,116,.42),rgba(70,10,22,.82));
+  border-color:rgba(255,162,176,.62);
+  color:#ffe5ea;
+}
+.limitScreen .heroHpBadge span{color:#fff0b8}
 .heroHpBadge.debugReady{
   background:linear-gradient(180deg,rgba(126,217,255,.42),rgba(18,34,73,.72));
   border-color:rgba(126,217,255,.72);

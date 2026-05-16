@@ -1,6 +1,7 @@
 import { createDeck } from "../../shared/game-core.js";
 
-const divisors = [2, 3, 5, 6, 9];
+const normalDivisors = [2, 3, 5, 6, 7, 8, 9];
+const strongDivisors = [3, 6, 9, 11, 25];
 
 function getDivisorForMode(modeId){
   const map = {
@@ -8,9 +9,17 @@ function getDivisorForMode(modeId){
     m3: 3,
     m5: 5,
     m6: 6,
-    m9: 9
+    m7: 7,
+    m8: 8,
+    m9: 9,
+    m11: 11,
+    m25: 25
   };
   return map[modeId] || null;
+}
+
+function getRandomDivisors(strong){
+  return strong ? strongDivisors : normalDivisors;
 }
 
 function makeProblem({ number, claimDivisor, truth }){
@@ -51,6 +60,7 @@ function buildSingleModeDeck(divisor, strong){
 
 function buildRandomDeck(strong){
   const { min, max } = getRange(strong);
+  const divisors = getRandomDivisors(strong);
   const truths = [];
   const lies = [];
   const usedPairs = new Set();
