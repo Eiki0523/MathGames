@@ -328,7 +328,7 @@ function handleExposeFake(){
   void els.enemy.offsetWidth;
   els.enemy.classList.add("busted");
   AudioManager.playSE("correct");
-  nextAfterDelay(760);
+  nextAfterDelay(380);
 }
 
 function handleFalseNegative(){
