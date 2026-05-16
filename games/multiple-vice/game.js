@@ -41,7 +41,6 @@ const els = {
   battle: document.getElementById("battle"),
   stage: document.getElementById("stage"),
   enemy: document.getElementById("enemy"),
-  hpFill: document.getElementById("hpFill"),
   beam: document.getElementById("beam"),
   inputMount: document.getElementById("inputMount"),
   countdownOverlay: document.getElementById("countdownOverlay"),
@@ -66,6 +65,7 @@ const state = {
   strong: false,
   limitMode: false,
   sound: true,
+  soundToggleCount: 0,
   running: false,
   ending: false,
   warned30: false,
@@ -83,11 +83,11 @@ function createClock(durationMs){
     onTick({ sec, ratio }){
       els.timeLabel.textContent = sec.toFixed(1);
       els.timeFill.style.width = `${ratio * 100}%`;
-      if(!state.warned30 && sec <= 30){
+      if(!state.warned30 && sec <= 15){
         state.warned30 = true;
         triggerTimeWarning("warn");
       }
-      if(!state.warned10 && sec <= 10){
+      if(!state.warned10 && sec <= 5){
         state.warned10 = true;
         triggerTimeWarning("danger");
       }
@@ -141,7 +141,6 @@ function renderProblem(){
   const labels = [state.strong ? "強化" : "通常"];
   if(state.limitMode) labels.push("極限");
   els.modeLabel.textContent = `${labels.join("+")} / ${getCurrentMode().name}`;
-  els.hpFill.style.width = "100%";
   setEnemyVisual("normal");
 }
 
@@ -263,7 +262,7 @@ function handleFalsePositive(){
   void els.enemy.offsetWidth;
   els.enemy.classList.add("evilRush");
   takeDamage();
-  nextAfterDelay(920);
+  nextAfterDelay(760);
 }
 
 function handleChoice(choice){
@@ -305,7 +304,6 @@ function resetStatus(){
   els.heroHp.textContent = String(state.heroHp);
   els.timeLabel.textContent = (getModeDurationMs() / 1000).toFixed(1);
   els.timeFill.style.width = "100%";
-  els.hpFill.style.width = "100%";
 }
 
 function startGame(modeId){
@@ -517,13 +515,25 @@ function wireEvents(){
 
   els.soundToggle.addEventListener("click", () => {
     state.sound = !state.sound;
+    state.soundToggleCount++;
     AudioManager.setEnabled(state.sound);
+    if(state.soundToggleCount >= 10 && !state.strongUnlocked){
+      state.strongUnlocked = true;
+      Storage.saveFlag(gameConfig.unlock.storageKey, true);
+      updateMenu();
+      toast("裏ワザ成功：強化モード解放！");
+      AudioManager.playSE("defeat");
+      return;
+    }
     if(!state.sound){
       bgmController.stop();
     }else if(state.running){
       bgmController.start(getCurrentMode().bgm);
     }
     updateMenu();
+    if(state.soundToggleCount >= 7 && !state.strongUnlocked){
+      toast(`あと${10 - state.soundToggleCount}回…`);
+    }
   });
 
   els.bestOpen.addEventListener("click", openBestModal);

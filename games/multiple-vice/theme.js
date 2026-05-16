@@ -21,7 +21,7 @@ export const themeConfig = {
   notes: {
     strong: "強化モードでは3桁の魂が現れます。",
     limit: "極限モードでは見逃し回数が1になります。",
-    locked: "ランダムモードで5体以上見抜くと強化モードが解放されます。",
+    locked: "ランダムモードで12体以上見抜くと強化モードが解放されます。",
     unlocked: "強化モード解放済み。押すと通常/強化を切り替えます。"
   }
 };
@@ -79,7 +79,7 @@ export function renderEnemySvg(problem, mood = "normal"){
         <path d="M23 26 C10 42 10 72 22 88" fill="none" stroke="${stroke}" stroke-width="4" stroke-linecap="round"/>
         <path d="M101 26 C114 42 114 72 102 88" fill="none" stroke="${stroke}" stroke-width="4" stroke-linecap="round"/>
         <circle cx="62" cy="58" r="54" fill="none" stroke="${aura}" stroke-width="4" opacity=".5"/>
-        <text x="62" y="76" text-anchor="middle" font-size="38" font-weight="1000" fill="${isEvil ? "#fff6bf" : "#15335e"}">${problem.number}</text>
+        <text x="62" y="54" text-anchor="middle" font-size="34" font-weight="1000" fill="${isEvil ? "#fff6bf" : "#15335e"}">${problem.number}</text>
         ${eyePath}
         ${mouth}
       </g>
